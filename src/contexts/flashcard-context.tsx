@@ -12,17 +12,20 @@ import {
 import type { Folder, Card } from "@/components/views/folders-view";
 
 type AppView = "folders" | "cards";
+type ViewMode = "list" | "focus";
 
 interface FlashcardState {
   folders: Folder[];
   currentFolderId: string | null;
   appView: AppView;
+  viewMode: ViewMode;
 }
 
 type FlashcardAction =
   | { type: "SET_FOLDERS"; payload: Folder[] }
   | { type: "SET_CURRENT_FOLDER"; payload: string | null }
   | { type: "SET_APP_VIEW"; payload: AppView }
+  | { type: "SET_VIEW_MODE"; payload: ViewMode }
   | { type: "CREATE_FOLDER"; payload: Folder }
   | { type: "UPDATE_FOLDER"; payload: { id: string; name: string } }
   | { type: "DELETE_FOLDER"; payload: { id: string } }
@@ -43,57 +46,7 @@ type FlashcardAction =
     };
 
 const STORAGE_KEY = "flashcard-data";
-
-const createDefaultFolders = (): Folder[] => [
-  {
-    id: "1",
-    name: "Web Development",
-    cards: [
-      {
-        id: "1-1",
-        front: "What is React?",
-        back: "A JavaScript library for building user interfaces",
-        correct: 0,
-        incorrect: 0,
-      },
-      {
-        id: "1-2",
-        front: "What is TypeScript?",
-        back: "A typed superset of JavaScript that compiles to plain JavaScript",
-        correct: 0,
-        incorrect: 0,
-      },
-      {
-        id: "1-3",
-        front: "What is Tailwind CSS?",
-        back: "A utility-first CSS framework for rapidly building custom designs",
-        correct: 0,
-        incorrect: 0,
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "JavaScript Basics",
-    cards: [
-      {
-        id: "2-1",
-        front: "What is a closure?",
-        back: "A function that has access to variables in its outer scope",
-        correct: 0,
-        incorrect: 0,
-      },
-      {
-        id: "2-2",
-        front: "What is hoisting?",
-        back: "JavaScript's default behavior of moving declarations to the top",
-        correct: 0,
-        incorrect: 0,
-      },
-    ],
-  },
-];
-
+const createDefaultFolders = (): Folder[] => [];
 const updateFolderCards = (
   folders: Folder[],
   folderId: string,
@@ -116,6 +69,8 @@ const flashcardReducer = (
       return { ...state, currentFolderId: action.payload };
     case "SET_APP_VIEW":
       return { ...state, appView: action.payload };
+    case "SET_VIEW_MODE":
+      return { ...state, viewMode: action.payload };
     case "CREATE_FOLDER":
       return { ...state, folders: [...state.folders, action.payload] };
     case "UPDATE_FOLDER":
@@ -229,9 +184,11 @@ interface FlashcardContextType {
   folders: Folder[];
   currentFolderId: string | null;
   appView: AppView;
+  viewMode: ViewMode;
   setFolders: (folders: Folder[]) => void;
   setCurrentFolderId: (id: string | null) => void;
   setAppView: (view: AppView) => void;
+  setViewMode: (mode: ViewMode) => void;
   createFolder: (name: string) => void;
   updateFolder: (id: string, name: string) => void;
   deleteFolder: (id: string) => void;
@@ -262,11 +219,12 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       folders: [],
       currentFolderId: null,
       appView: "folders",
+      viewMode: "list",
     },
     initializeState,
   );
 
-  const { folders, currentFolderId, appView } = state;
+  const { folders, currentFolderId, appView, viewMode } = state;
 
   // Save data to localStorage whenever folders change
   useEffect(() => {
@@ -292,6 +250,13 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
   const setAppView = useCallback(
     (view: AppView) => {
       dispatch({ type: "SET_APP_VIEW", payload: view });
+    },
+    [dispatch],
+  );
+
+  const setViewMode = useCallback(
+    (mode: ViewMode) => {
+      dispatch({ type: "SET_VIEW_MODE", payload: mode });
     },
     [dispatch],
   );
@@ -377,9 +342,11 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       folders,
       currentFolderId,
       appView,
+      viewMode,
       setFolders,
       setCurrentFolderId,
       setAppView,
+      setViewMode,
       createFolder,
       updateFolder,
       deleteFolder,
@@ -393,9 +360,11 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       folders,
       currentFolderId,
       appView,
+      viewMode,
       setFolders,
       setCurrentFolderId,
       setAppView,
+      setViewMode,
       createFolder,
       updateFolder,
       deleteFolder,

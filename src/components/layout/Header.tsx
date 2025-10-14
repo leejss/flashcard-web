@@ -4,26 +4,28 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Focus, List, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useFlashcard } from "@/contexts/flashcard-context";
 
-interface HeaderProps {
-  appView: "folders" | "cards";
-  currentFolderName?: string;
-  viewMode: "list" | "focus";
-  onViewModeChange: (mode: "list" | "focus") => void;
-  hasCards: boolean;
-  onGoBackToFolders?: () => void;
-}
-
-export function Header({
-  appView,
-  currentFolderName,
-  viewMode,
-  onViewModeChange,
-  hasCards,
-  onGoBackToFolders,
-}: HeaderProps) {
+export function Header() {
+  const {
+    appView,
+    viewMode,
+    setViewMode,
+    setAppView,
+    setCurrentFolderId,
+    getCurrentFolder,
+  } = useFlashcard();
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  const currentFolder = getCurrentFolder();
+  const hasCards = (currentFolder?.cards.length || 0) > 0;
+
+  const goBackToFolders = () => {
+    setAppView("folders");
+    setCurrentFolderId(null);
+    setViewMode("list");
+  };
 
   // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
@@ -39,24 +41,20 @@ export function Header({
       <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
           <button
-            onClick={
-              appView === "cards" && onGoBackToFolders
-                ? onGoBackToFolders
-                : undefined
-            }
+            onClick={appView === "cards" ? goBackToFolders : undefined}
             className={`text-lg sm:text-2xl truncate dark:text-white ${
-              appView === "cards" && onGoBackToFolders
+              appView === "cards"
                 ? "hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer transition-colors"
                 : ""
             }`}
           >
             Flashcards
           </button>
-          {appView === "cards" && currentFolderName && (
+          {appView === "cards" && currentFolder?.name && (
             <>
               <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-600 flex-shrink-0" />
               <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
-                {currentFolderName}
+                {currentFolder.name}
               </span>
             </>
           )}
@@ -84,7 +82,7 @@ export function Header({
             <Button
               variant="outline"
               onClick={() =>
-                onViewModeChange(viewMode === "list" ? "focus" : "list")
+                setViewMode(viewMode === "list" ? "focus" : "list")
               }
               size="sm"
               className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-9 sm:h-10"

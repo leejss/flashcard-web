@@ -1,42 +1,36 @@
 "use client";
 
+import { useState } from "react";
 import { AddFolderButton } from "./add-folder-button";
 import { AddCardButton } from "./add-card-button";
+import { useFlashcard } from "@/contexts/flashcard-context";
 
-interface ActionButtonsProps {
-  appView: "folders" | "cards";
-  isAddFolderDialogOpen: boolean;
-  setIsAddFolderDialogOpen: (open: boolean) => void;
-  isAddCardDialogOpen: boolean;
-  setIsAddCardDialogOpen: (open: boolean) => void;
-  onGoBackToFolders: () => void;
-  // Folder form props
-  newFolderName: string;
-  setNewFolderName: (name: string) => void;
-  onCreateFolder: () => void;
-  // Card form props
-  newFront: string;
-  newBack: string;
-  setNewFront: (front: string) => void;
-  setNewBack: (back: string) => void;
-  onAddCard: () => void;
-}
+export function ActionButtons() {
+  const { appView, currentFolderId, createFolder, createCard } = useFlashcard();
+  
+  const [isAddFolderDialogOpen, setIsAddFolderDialogOpen] = useState(false);
+  const [isAddCardDialogOpen, setIsAddCardDialogOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newFront, setNewFront] = useState("");
+  const [newBack, setNewBack] = useState("");
 
-export function ActionButtons({
-  appView,
-  isAddFolderDialogOpen,
-  setIsAddFolderDialogOpen,
-  isAddCardDialogOpen,
-  setIsAddCardDialogOpen,
-  newFolderName,
-  setNewFolderName,
-  onCreateFolder,
-  newFront,
-  newBack,
-  setNewFront,
-  setNewBack,
-  onAddCard,
-}: ActionButtonsProps) {
+  const handleCreateFolder = () => {
+    if (newFolderName.trim()) {
+      createFolder(newFolderName);
+      setNewFolderName("");
+      setIsAddFolderDialogOpen(false);
+    }
+  };
+
+  const handleAddCard = () => {
+    if (currentFolderId && newFront.trim() && newBack.trim()) {
+      createCard(currentFolderId, newFront, newBack);
+      setNewFront("");
+      setNewBack("");
+      setIsAddCardDialogOpen(false);
+    }
+  };
+
   if (appView === "folders") {
     return (
       <AddFolderButton
@@ -44,7 +38,7 @@ export function ActionButtons({
         onOpenChange={setIsAddFolderDialogOpen}
         folderName={newFolderName}
         onFolderNameChange={setNewFolderName}
-        onSubmit={onCreateFolder}
+        onSubmit={handleCreateFolder}
       />
     );
   }
@@ -57,7 +51,7 @@ export function ActionButtons({
       back={newBack}
       onFrontChange={setNewFront}
       onBackChange={setNewBack}
-      onSubmit={onAddCard}
+      onSubmit={handleAddCard}
     />
   );
 }
