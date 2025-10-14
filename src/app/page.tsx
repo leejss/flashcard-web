@@ -1,6 +1,7 @@
 import { AppContent } from "@/components/app-content";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DialogProvider } from "@/contexts/dialog-context";
+import { FlashcardProvider } from "@/contexts/flashcard-context";
 
 export default function App() {
   return (
@@ -10,9 +11,11 @@ export default function App() {
       enableSystem={false}
       disableTransitionOnChange={false}
     >
-      <DialogProvider>
-        <AppContent />
-      </DialogProvider>
+      <FlashcardProvider>
+        <DialogProvider>
+          <AppContent />
+        </DialogProvider>
+      </FlashcardProvider>
     </ThemeProvider>
   );
 }
