@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useCallback,
+  useState,
   type ReactNode,
 } from "react";
 import type { Folder, Card } from "@/components/views/folders-view";
@@ -160,23 +161,6 @@ const flashcardReducer = (
 };
 
 const initializeState = (baseState: FlashcardState): FlashcardState => {
-  if (typeof window === "undefined") {
-    return { ...baseState, folders: createDefaultFolders() };
-  }
-
-  const saved = window.localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved) as Folder[];
-      if (Array.isArray(parsed)) {
-        return { ...baseState, folders: parsed };
-      }
-    } catch (error) {
-      console.error("Failed to load data:", error);
-    }
-    window.localStorage.removeItem(STORAGE_KEY);
-  }
-
   return { ...baseState, folders: createDefaultFolders() };
 };
 
@@ -185,6 +169,7 @@ interface FlashcardContextType {
   currentFolderId: string | null;
   appView: AppView;
   viewMode: ViewMode;
+  isHydrating: boolean;
   setFolders: (folders: Folder[]) => void;
   setCurrentFolderId: (id: string | null) => void;
   setAppView: (view: AppView) => void;
@@ -225,13 +210,31 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
   );
 
   const { folders, currentFolderId, appView, viewMode } = state;
+  const [isHydrating, setIsHydrating] = useState(true);
+
+  // Load data from localStorage after hydration
+  useEffect(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Folder[];
+        if (Array.isArray(parsed)) {
+          dispatch({ type: "SET_FOLDERS", payload: parsed });
+        }
+      } catch (error) {
+        console.error("Failed to load data:", error);
+        window.localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+    setIsHydrating(false);
+  }, []);
 
   // Save data to localStorage whenever folders change
   useEffect(() => {
-    if (folders.length > 0) {
+    if (!isHydrating && folders.length > 0) {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(folders));
     }
-  }, [folders]);
+  }, [folders, isHydrating]);
 
   const setFolders = useCallback(
     (updatedFolders: Folder[]) => {
@@ -343,6 +346,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       currentFolderId,
       appView,
       viewMode,
+      isHydrating,
       setFolders,
       setCurrentFolderId,
       setAppView,
@@ -361,6 +365,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       currentFolderId,
       appView,
       viewMode,
+      isHydrating,
       setFolders,
       setCurrentFolderId,
       setAppView,

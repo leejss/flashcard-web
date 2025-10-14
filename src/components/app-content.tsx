@@ -8,7 +8,18 @@ import { CardsView } from "./views/cards-view";
 import { FoldersView } from "./views/folders-view";
 
 export function AppContent() {
-  const { appView, viewMode } = useFlashcard();
+  const { appView, viewMode, isHydrating } = useFlashcard();
+
+  if (isHydrating) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-black dark:border-white border-t-transparent dark:border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col transition-colors">

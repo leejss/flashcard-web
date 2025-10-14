@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flashcard } from "../flashcard";
 import { EmptyState } from "../empty-state";
 import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -35,14 +34,20 @@ import {
 import type { Card } from "./folders-view";
 import { useFlashcard } from "@/contexts/flashcard-context";
 import { toast } from "sonner";
+import { Flashcard } from "../Flashcard";
 
 interface CardsViewProps {
   viewMode: "list" | "focus";
 }
 
 export function CardsView({ viewMode }: CardsViewProps) {
-  const { currentFolderId, getCurrentFolder, updateCard, deleteCard, updateCardStats } =
-    useFlashcard();
+  const {
+    currentFolderId,
+    getCurrentFolder,
+    updateCard,
+    deleteCard,
+    updateCardStats,
+  } = useFlashcard();
   const isMobile = useIsMobile();
 
   const currentFolder = getCurrentFolder();
