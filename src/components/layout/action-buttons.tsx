@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/drawer";
 import { FolderPlus, Home, Plus } from "lucide-react";
 import { useIsMobile } from "@/components/ui/use-mobile";
-import { FolderForm } from "@/components/forms/FolderForm";
-import { CardForm } from "@/components/forms/CardForm";
+import { FolderForm } from "@/components/forms/folder-form";
+import { CardForm } from "@/components/forms/card-form";
 
 interface ActionButtonsProps {
   appView: "folders" | "cards";

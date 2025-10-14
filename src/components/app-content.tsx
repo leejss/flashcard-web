@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flashcard } from "./Flashcard";
-import { FolderCard } from "./FolderCard";
-import { EmptyState } from "./EmptyState";
-import { Header } from "./layout/Header";
-import { ActionButtons } from "./layout/ActionButtons";
-import { FolderForm } from "./forms/FolderForm";
-import { CardForm } from "./forms/CardForm";
+import { Flashcard } from "./flashcard";
+import { FolderCard } from "./folder-card";
+import { EmptyState } from "./empty-state";
+import { Header } from "./layout/header";
+import { ActionButtons } from "./layout/action-buttons";
+import { FolderForm } from "./forms/folder-form";
+import { CardForm } from "./forms/card-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -47,7 +47,7 @@ import {
   FolderOpen,
   FileQuestion,
 } from "lucide-react";
-import { useDialog } from "@/contexts/DialogContext";
+import { useDialog } from "@/contexts/dialog-context";
 
 interface Card {
   id: string;

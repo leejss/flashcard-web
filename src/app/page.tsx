@@ -1,6 +1,6 @@
-import { AppContent } from "@/components/AppContent";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { DialogProvider } from "@/contexts/DialogContext";
+import { AppContent } from "@/components/app-content";
+import { ThemeProvider } from "@/components/theme-provider";
+import { DialogProvider } from "@/contexts/dialog-context";
 
 export default function App() {
   return (
