@@ -37,16 +37,16 @@ export function FolderCard({
     <div className="relative group">
       <div
         onClick={onClick}
-        className="flex flex-col items-center justify-center p-4 sm:p-6 border-2 border-black dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 active:bg-gray-50 dark:active:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors min-h-[140px] sm:min-h-[160px]"
+        className="flex flex-col items-center justify-center p-3 sm:p-4 border-2 border-black dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 active:bg-gray-50 dark:active:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors min-h-[110px] sm:min-h-[120px]"
       >
         <Folder
-          className="w-12 h-12 sm:w-16 sm:h-16 mb-2 sm:mb-3 text-black dark:text-white"
+          className="w-10 h-10 sm:w-12 sm:h-12 mb-1 sm:mb-2 text-black dark:text-white"
           strokeWidth={2}
         />
-        <p className="text-center mb-1 break-words max-w-full px-2 text-sm sm:text-base dark:text-white">
+        <p className="text-center mb-1 break-words max-w-full px-2 text-xs sm:text-sm dark:text-white">
           {name}
         </p>
-        <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
+        <p className="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs">
           {cardCount} card{cardCount !== 1 ? "s" : ""}
         </p>
       </div>

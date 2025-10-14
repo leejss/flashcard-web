@@ -90,35 +90,58 @@ export function ActionButtons({
 
   return (
     <>
-      <Button
-        variant="outline"
-        onClick={onGoBackToFolders}
-        className="fixed bottom-6 left-4 sm:top-24 sm:left-8 sm:bottom-auto z-50 border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors shadow-lg h-12 sm:h-10"
-      >
-        <Home className="w-4 h-4 sm:mr-2" />
-        <span className="hidden sm:inline">All Folders</span>
-      </Button>
-
-      {isMobile ? (
-        <Drawer
-          open={isAddCardDialogOpen}
-          onOpenChange={setIsAddCardDialogOpen}
-        >
-          <DrawerTrigger asChild>
-            <Button
-              className="fixed bottom-6 right-4 z-50 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-gray-600 shadow-lg h-14 w-14 rounded-full p-0"
-              size="lg"
-            >
-              <Plus className="w-6 h-6" />
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="border-2 border-black dark:border-gray-600 border-b-0 max-h-[90vh] dark:bg-gray-900">
-            <DrawerHeader>
-              <DrawerTitle className="dark:text-white">
-                Add New Flashcard
-              </DrawerTitle>
-            </DrawerHeader>
-            <div className="overflow-y-auto">
+      {isMobile
+        ? (
+          <Drawer
+            open={isAddCardDialogOpen}
+            onOpenChange={setIsAddCardDialogOpen}
+          >
+            <DrawerTrigger asChild>
+              <Button
+                className="fixed bottom-6 right-4 z-50 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-gray-600 shadow-lg h-14 w-14 rounded-full p-0"
+                size="lg"
+              >
+                <Plus className="w-6 h-6" />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="border-2 border-black dark:border-gray-600 border-b-0 max-h-[90vh] dark:bg-gray-900">
+              <DrawerHeader>
+                <DrawerTitle className="dark:text-white">
+                  Add New Flashcard
+                </DrawerTitle>
+              </DrawerHeader>
+              <div className="overflow-y-auto">
+                <CardForm
+                  front={newFront}
+                  back={newBack}
+                  onFrontChange={setNewFront}
+                  onBackChange={setNewBack}
+                  onSubmit={onAddCard}
+                />
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )
+        : (
+          <Dialog
+            open={isAddCardDialogOpen}
+            onOpenChange={setIsAddCardDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button
+                className="fixed top-24 right-8 z-50 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-gray-600 shadow-lg h-14 px-6"
+                size="lg"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add Card
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="border-2 border-black dark:border-gray-600 max-w-3xl dark:bg-gray-900">
+              <DialogHeader>
+                <DialogTitle className="dark:text-white">
+                  Add New Flashcard
+                </DialogTitle>
+              </DialogHeader>
               <CardForm
                 front={newFront}
                 back={newBack}
@@ -126,39 +149,9 @@ export function ActionButtons({
                 onBackChange={setNewBack}
                 onSubmit={onAddCard}
               />
-            </div>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog
-          open={isAddCardDialogOpen}
-          onOpenChange={setIsAddCardDialogOpen}
-        >
-          <DialogTrigger asChild>
-            <Button
-              className="fixed top-24 right-8 z-50 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-gray-600 shadow-lg h-14 px-6"
-              size="lg"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add Card
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="border-2 border-black dark:border-gray-600 max-w-3xl dark:bg-gray-900">
-            <DialogHeader>
-              <DialogTitle className="dark:text-white">
-                Add New Flashcard
-              </DialogTitle>
-            </DialogHeader>
-            <CardForm
-              front={newFront}
-              back={newBack}
-              onFrontChange={setNewFront}
-              onBackChange={setNewBack}
-              onSubmit={onAddCard}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+            </DialogContent>
+          </Dialog>
+        )}
     </>
   );
 }

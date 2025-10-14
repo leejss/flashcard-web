@@ -13,7 +13,7 @@ export function Flashcard({ front, back }: FlashcardProps) {
 
   return (
     <motion.div
-      className="relative w-full h-[280px] sm:h-[320px] md:h-[400px] cursor-pointer"
+      className="relative w-full h-[200px] sm:h-[220px] md:h-[280px] cursor-pointer"
       onClick={() => setIsFlipped(!isFlipped)}
       style={{ perspective: "1000px" }}
       whileHover={{ scale: 1.02 }}
@@ -28,20 +28,20 @@ export function Flashcard({ front, back }: FlashcardProps) {
       >
         {/* Front of card */}
         <div
-          className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-white dark:bg-gray-900 border-2 border-black dark:border-gray-600 rounded-lg"
+          className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-900 border-2 border-black dark:border-gray-600 rounded-lg"
           style={{ backfaceVisibility: "hidden" }}
         >
-          <p className="text-center text-sm sm:text-base dark:text-white">
+          <p className="text-center text-xs sm:text-sm dark:text-white">
             {front}
           </p>
         </div>
 
         {/* Back of card */}
         <div
-          className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-black dark:bg-white text-white dark:text-black border-2 border-black dark:border-gray-600 rounded-lg"
+          className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black dark:bg-white text-white dark:text-black border-2 border-black dark:border-gray-600 rounded-lg"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
-          <p className="text-center text-sm sm:text-base">{back}</p>
+          <p className="text-center text-xs sm:text-sm">{back}</p>
         </div>
       </motion.div>
     </motion.div>

@@ -470,6 +470,7 @@ export function AppContent() {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         hasCards={currentCards.length > 0}
+        onGoBackToFolders={goBackToFolders}
       />
 
       {/* Fixed Action Buttons */}
