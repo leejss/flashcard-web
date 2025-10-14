@@ -3,24 +3,245 @@
 import {
   createContext,
   useContext,
-  useState,
+  useReducer,
   useEffect,
+  useMemo,
+  useCallback,
   type ReactNode,
 } from "react";
 import type { Folder, Card } from "@/components/views/folders-view";
 
+type AppView = "folders" | "cards";
+
+interface FlashcardState {
+  folders: Folder[];
+  currentFolderId: string | null;
+  appView: AppView;
+}
+
+type FlashcardAction =
+  | { type: "SET_FOLDERS"; payload: Folder[] }
+  | { type: "SET_CURRENT_FOLDER"; payload: string | null }
+  | { type: "SET_APP_VIEW"; payload: AppView }
+  | { type: "CREATE_FOLDER"; payload: Folder }
+  | { type: "UPDATE_FOLDER"; payload: { id: string; name: string } }
+  | { type: "DELETE_FOLDER"; payload: { id: string } }
+  | { type: "CREATE_CARD"; payload: { folderId: string; card: Card } }
+  | {
+      type: "UPDATE_CARD";
+      payload: { folderId: string; index: number; front: string; back: string };
+    }
+  | { type: "DELETE_CARD"; payload: { folderId: string; index: number } }
+  | {
+      type: "UPDATE_CARD_STATS";
+      payload: {
+        folderId: string;
+        index: number;
+        isCorrect: boolean;
+        lastReviewed: string;
+      };
+    };
+
+const STORAGE_KEY = "flashcard-data";
+
+const createDefaultFolders = (): Folder[] => [
+  {
+    id: "1",
+    name: "Web Development",
+    cards: [
+      {
+        id: "1-1",
+        front: "What is React?",
+        back: "A JavaScript library for building user interfaces",
+        correct: 0,
+        incorrect: 0,
+      },
+      {
+        id: "1-2",
+        front: "What is TypeScript?",
+        back: "A typed superset of JavaScript that compiles to plain JavaScript",
+        correct: 0,
+        incorrect: 0,
+      },
+      {
+        id: "1-3",
+        front: "What is Tailwind CSS?",
+        back: "A utility-first CSS framework for rapidly building custom designs",
+        correct: 0,
+        incorrect: 0,
+      },
+    ],
+  },
+  {
+    id: "2",
+    name: "JavaScript Basics",
+    cards: [
+      {
+        id: "2-1",
+        front: "What is a closure?",
+        back: "A function that has access to variables in its outer scope",
+        correct: 0,
+        incorrect: 0,
+      },
+      {
+        id: "2-2",
+        front: "What is hoisting?",
+        back: "JavaScript's default behavior of moving declarations to the top",
+        correct: 0,
+        incorrect: 0,
+      },
+    ],
+  },
+];
+
+const updateFolderCards = (
+  folders: Folder[],
+  folderId: string,
+  updater: (cards: Card[]) => Card[],
+): Folder[] =>
+  folders.map((folder) =>
+    folder.id === folderId
+      ? { ...folder, cards: updater(folder.cards) }
+      : folder,
+  );
+
+const flashcardReducer = (
+  state: FlashcardState,
+  action: FlashcardAction,
+): FlashcardState => {
+  switch (action.type) {
+    case "SET_FOLDERS":
+      return { ...state, folders: action.payload };
+    case "SET_CURRENT_FOLDER":
+      return { ...state, currentFolderId: action.payload };
+    case "SET_APP_VIEW":
+      return { ...state, appView: action.payload };
+    case "CREATE_FOLDER":
+      return { ...state, folders: [...state.folders, action.payload] };
+    case "UPDATE_FOLDER":
+      return {
+        ...state,
+        folders: state.folders.map((folder) =>
+          folder.id === action.payload.id
+            ? { ...folder, name: action.payload.name }
+            : folder,
+        ),
+      };
+    case "DELETE_FOLDER":
+      return {
+        ...state,
+        folders: state.folders.filter(
+          (folder) => folder.id !== action.payload.id,
+        ),
+      };
+    case "CREATE_CARD":
+      return {
+        ...state,
+        folders: updateFolderCards(
+          state.folders,
+          action.payload.folderId,
+          (cards) => [...cards, action.payload.card],
+        ),
+      };
+    case "UPDATE_CARD":
+      return {
+        ...state,
+        folders: updateFolderCards(
+          state.folders,
+          action.payload.folderId,
+          (cards) => {
+            if (!cards[action.payload.index]) {
+              return cards;
+            }
+            const nextCards = [...cards];
+            nextCards[action.payload.index] = {
+              ...nextCards[action.payload.index],
+              front: action.payload.front,
+              back: action.payload.back,
+            };
+            return nextCards;
+          },
+        ),
+      };
+    case "DELETE_CARD":
+      return {
+        ...state,
+        folders: updateFolderCards(
+          state.folders,
+          action.payload.folderId,
+          (cards) => cards.filter((_, idx) => idx !== action.payload.index),
+        ),
+      };
+    case "UPDATE_CARD_STATS":
+      return {
+        ...state,
+        folders: updateFolderCards(
+          state.folders,
+          action.payload.folderId,
+          (cards) => {
+            if (!cards[action.payload.index]) {
+              return cards;
+            }
+            const nextCards = [...cards];
+            const targetCard = nextCards[action.payload.index];
+            nextCards[action.payload.index] = {
+              ...targetCard,
+              correct: action.payload.isCorrect
+                ? targetCard.correct + 1
+                : targetCard.correct,
+              incorrect: action.payload.isCorrect
+                ? targetCard.incorrect
+                : targetCard.incorrect + 1,
+              lastReviewed: action.payload.lastReviewed,
+            };
+            return nextCards;
+          },
+        ),
+      };
+    default: {
+      return state;
+    }
+  }
+};
+
+const initializeState = (baseState: FlashcardState): FlashcardState => {
+  if (typeof window === "undefined") {
+    return { ...baseState, folders: createDefaultFolders() };
+  }
+
+  const saved = window.localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved) as Folder[];
+      if (Array.isArray(parsed)) {
+        return { ...baseState, folders: parsed };
+      }
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    }
+    window.localStorage.removeItem(STORAGE_KEY);
+  }
+
+  return { ...baseState, folders: createDefaultFolders() };
+};
+
 interface FlashcardContextType {
   folders: Folder[];
   currentFolderId: string | null;
-  appView: "folders" | "cards";
+  appView: AppView;
   setFolders: (folders: Folder[]) => void;
   setCurrentFolderId: (id: string | null) => void;
-  setAppView: (view: "folders" | "cards") => void;
+  setAppView: (view: AppView) => void;
   createFolder: (name: string) => void;
   updateFolder: (id: string, name: string) => void;
   deleteFolder: (id: string) => void;
   createCard: (folderId: string, front: string, back: string) => void;
-  updateCard: (folderId: string, index: number, front: string, back: string) => void;
+  updateCard: (
+    folderId: string,
+    index: number,
+    front: string,
+    back: string,
+  ) => void;
   deleteCard: (folderId: string, index: number) => void;
   updateCardStats: (
     folderId: string,
@@ -35,196 +256,159 @@ const FlashcardContext = createContext<FlashcardContextType | undefined>(
 );
 
 export function FlashcardProvider({ children }: { children: ReactNode }) {
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
-  const [appView, setAppView] = useState<"folders" | "cards">("folders");
+  const [state, dispatch] = useReducer(
+    flashcardReducer,
+    {
+      folders: [],
+      currentFolderId: null,
+      appView: "folders",
+    },
+    initializeState,
+  );
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("flashcard-data");
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        setFolders(data);
-      } catch (e) {
-        console.error("Failed to load data:", e);
-      }
-    } else {
-      // Initial demo data
-      setFolders([
-        {
-          id: "1",
-          name: "Web Development",
-          cards: [
-            {
-              id: "1-1",
-              front: "What is React?",
-              back: "A JavaScript library for building user interfaces",
-              correct: 0,
-              incorrect: 0,
-            },
-            {
-              id: "1-2",
-              front: "What is TypeScript?",
-              back: "A typed superset of JavaScript that compiles to plain JavaScript",
-              correct: 0,
-              incorrect: 0,
-            },
-            {
-              id: "1-3",
-              front: "What is Tailwind CSS?",
-              back: "A utility-first CSS framework for rapidly building custom designs",
-              correct: 0,
-              incorrect: 0,
-            },
-          ],
-        },
-        {
-          id: "2",
-          name: "JavaScript Basics",
-          cards: [
-            {
-              id: "2-1",
-              front: "What is a closure?",
-              back: "A function that has access to variables in its outer scope",
-              correct: 0,
-              incorrect: 0,
-            },
-            {
-              id: "2-2",
-              front: "What is hoisting?",
-              back: "JavaScript's default behavior of moving declarations to the top",
-              correct: 0,
-              incorrect: 0,
-            },
-          ],
-        },
-      ]);
-    }
-  }, []);
+  const { folders, currentFolderId, appView } = state;
 
   // Save data to localStorage whenever folders change
   useEffect(() => {
     if (folders.length > 0) {
-      localStorage.setItem("flashcard-data", JSON.stringify(folders));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(folders));
     }
   }, [folders]);
 
-  const createFolder = (name: string) => {
-    const newFolder: Folder = {
-      id: Date.now().toString(),
-      name,
-      cards: [],
-    };
-    setFolders([...folders, newFolder]);
-  };
+  const setFolders = useCallback(
+    (updatedFolders: Folder[]) => {
+      dispatch({ type: "SET_FOLDERS", payload: updatedFolders });
+    },
+    [dispatch],
+  );
 
-  const updateFolder = (id: string, name: string) => {
-    setFolders(folders.map((f) => (f.id === id ? { ...f, name } : f)));
-  };
+  const setCurrentFolderId = useCallback(
+    (id: string | null) => {
+      dispatch({ type: "SET_CURRENT_FOLDER", payload: id });
+    },
+    [dispatch],
+  );
 
-  const deleteFolder = (id: string) => {
-    setFolders(folders.filter((f) => f.id !== id));
-  };
+  const setAppView = useCallback(
+    (view: AppView) => {
+      dispatch({ type: "SET_APP_VIEW", payload: view });
+    },
+    [dispatch],
+  );
 
-  const createCard = (folderId: string, front: string, back: string) => {
-    const newCard: Card = {
-      id: Date.now().toString(),
-      front,
-      back,
-      correct: 0,
-      incorrect: 0,
-    };
-    setFolders(
-      folders.map((f) =>
-        f.id === folderId ? { ...f, cards: [...f.cards, newCard] } : f,
-      ),
-    );
-  };
+  const createFolder = useCallback(
+    (name: string) => {
+      const newFolder: Folder = {
+        id: Date.now().toString(),
+        name,
+        cards: [],
+      };
+      dispatch({ type: "CREATE_FOLDER", payload: newFolder });
+    },
+    [dispatch],
+  );
 
-  const updateCard = (
-    folderId: string,
-    index: number,
-    front: string,
-    back: string,
-  ) => {
-    setFolders(
-      folders.map((f) => {
-        if (f.id === folderId) {
-          const updatedCards = [...f.cards];
-          updatedCards[index] = {
-            ...updatedCards[index],
-            front,
-            back,
-          };
-          return { ...f, cards: updatedCards };
-        }
-        return f;
-      }),
-    );
-  };
+  const updateFolder = useCallback(
+    (id: string, name: string) => {
+      dispatch({ type: "UPDATE_FOLDER", payload: { id, name } });
+    },
+    [dispatch],
+  );
 
-  const deleteCard = (folderId: string, index: number) => {
-    setFolders(
-      folders.map((f) => {
-        if (f.id === folderId) {
-          const updatedCards = f.cards.filter((_, i) => i !== index);
-          return { ...f, cards: updatedCards };
-        }
-        return f;
-      }),
-    );
-  };
+  const deleteFolder = useCallback(
+    (id: string) => {
+      dispatch({ type: "DELETE_FOLDER", payload: { id } });
+    },
+    [dispatch],
+  );
 
-  const updateCardStats = (
-    folderId: string,
-    index: number,
-    isCorrect: boolean,
-  ) => {
-    setFolders(
-      folders.map((f) => {
-        if (f.id === folderId) {
-          const updatedCards = [...f.cards];
-          updatedCards[index] = {
-            ...updatedCards[index],
-            correct: isCorrect
-              ? updatedCards[index].correct + 1
-              : updatedCards[index].correct,
-            incorrect: !isCorrect
-              ? updatedCards[index].incorrect + 1
-              : updatedCards[index].incorrect,
-            lastReviewed: new Date().toISOString(),
-          };
-          return { ...f, cards: updatedCards };
-        }
-        return f;
-      }),
-    );
-  };
+  const createCard = useCallback(
+    (folderId: string, front: string, back: string) => {
+      const newCard: Card = {
+        id: Date.now().toString(),
+        front,
+        back,
+        correct: 0,
+        incorrect: 0,
+      };
+      dispatch({ type: "CREATE_CARD", payload: { folderId, card: newCard } });
+    },
+    [dispatch],
+  );
 
-  const getCurrentFolder = () => {
-    return folders.find((f) => f.id === currentFolderId);
-  };
+  const updateCard = useCallback(
+    (folderId: string, index: number, front: string, back: string) => {
+      dispatch({
+        type: "UPDATE_CARD",
+        payload: { folderId, index, front, back },
+      });
+    },
+    [dispatch],
+  );
+
+  const deleteCard = useCallback(
+    (folderId: string, index: number) => {
+      dispatch({ type: "DELETE_CARD", payload: { folderId, index } });
+    },
+    [dispatch],
+  );
+
+  const updateCardStats = useCallback(
+    (folderId: string, index: number, isCorrect: boolean) => {
+      dispatch({
+        type: "UPDATE_CARD_STATS",
+        payload: {
+          folderId,
+          index,
+          isCorrect,
+          lastReviewed: new Date().toISOString(),
+        },
+      });
+    },
+    [dispatch],
+  );
+
+  const getCurrentFolder = useCallback(() => {
+    return folders.find((folder) => folder.id === currentFolderId);
+  }, [folders, currentFolderId]);
+
+  const contextValue = useMemo(
+    () => ({
+      folders,
+      currentFolderId,
+      appView,
+      setFolders,
+      setCurrentFolderId,
+      setAppView,
+      createFolder,
+      updateFolder,
+      deleteFolder,
+      createCard,
+      updateCard,
+      deleteCard,
+      updateCardStats,
+      getCurrentFolder,
+    }),
+    [
+      folders,
+      currentFolderId,
+      appView,
+      setFolders,
+      setCurrentFolderId,
+      setAppView,
+      createFolder,
+      updateFolder,
+      deleteFolder,
+      createCard,
+      updateCard,
+      deleteCard,
+      updateCardStats,
+      getCurrentFolder,
+    ],
+  );
 
   return (
-    <FlashcardContext.Provider
-      value={{
-        folders,
-        currentFolderId,
-        appView,
-        setFolders,
-        setCurrentFolderId,
-        setAppView,
-        createFolder,
-        updateFolder,
-        deleteFolder,
-        createCard,
-        updateCard,
-        deleteCard,
-        updateCardStats,
-        getCurrentFolder,
-      }}
-    >
+    <FlashcardContext.Provider value={contextValue}>
       {children}
     </FlashcardContext.Provider>
   );
