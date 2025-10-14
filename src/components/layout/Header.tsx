@@ -39,9 +39,11 @@ export function Header({
       <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
           <button
-            onClick={appView === "cards" && onGoBackToFolders
-              ? onGoBackToFolders
-              : undefined}
+            onClick={
+              appView === "cards" && onGoBackToFolders
+                ? onGoBackToFolders
+                : undefined
+            }
             className={`text-lg sm:text-2xl truncate dark:text-white ${
               appView === "cards" && onGoBackToFolders
                 ? "hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer transition-colors"
@@ -68,11 +70,13 @@ export function Header({
             onClick={toggleTheme}
             className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-9 w-9 p-0"
           >
-            {!mounted
-              ? <div className="w-4 h-4" />
-              : theme === "light"
-              ? <Moon className="w-4 h-4" />
-              : <Sun className="w-4 h-4" />}
+            {!mounted ? (
+              <div className="w-4 h-4" />
+            ) : theme === "light" ? (
+              <Moon className="w-4 h-4" />
+            ) : (
+              <Sun className="w-4 h-4" />
+            )}
           </Button>
 
           {/* View Mode Toggle - only show in cards view */}
@@ -80,23 +84,22 @@ export function Header({
             <Button
               variant="outline"
               onClick={() =>
-                onViewModeChange(viewMode === "list" ? "focus" : "list")}
+                onViewModeChange(viewMode === "list" ? "focus" : "list")
+              }
               size="sm"
               className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-9 sm:h-10"
             >
-              {viewMode === "list"
-                ? (
-                  <>
-                    <Focus className="w-4 h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Focus</span>
-                  </>
-                )
-                : (
-                  <>
-                    <List className="w-4 h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">List</span>
-                  </>
-                )}
+              {viewMode === "list" ? (
+                <>
+                  <Focus className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Focus</span>
+                </>
+              ) : (
+                <>
+                  <List className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">List</span>
+                </>
+              )}
             </Button>
           )}
         </div>
