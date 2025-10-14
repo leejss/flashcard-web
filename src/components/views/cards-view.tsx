@@ -34,7 +34,7 @@ import {
 import type { Card } from "./folders-view";
 import { useFlashcard } from "@/contexts/flashcard-context";
 import { toast } from "sonner";
-import { Flashcard } from "../Flashcard";
+import { Flashcard } from "../flashcard";
 
 interface CardsViewProps {
   viewMode: "list" | "focus";
