@@ -1,8 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Moon, Sun, List, Focus } from "lucide-react";
-import { useTheme } from "@/components/ThemeProvider";
+import { useTheme } from "next-themes";
 
 interface HeaderProps {
   appView: "folders" | "cards";
@@ -19,7 +20,17 @@ export function Header({
   onViewModeChange,
   hasCards,
 }: HeaderProps) {
-  const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+
+  // useEffect only runs on the client, so now we can safely show the UI
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
 
   return (
     <header className="border-b-2 border-black dark:border-gray-700 py-4 sm:py-6 px-4 sm:px-8">
@@ -46,7 +57,9 @@ export function Header({
             onClick={toggleTheme}
             className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-9 w-9 p-0"
           >
-            {theme === "light" ? (
+            {!mounted ? (
+              <div className="w-4 h-4" />
+            ) : theme === "light" ? (
               <Moon className="w-4 h-4" />
             ) : (
               <Sun className="w-4 h-4" />

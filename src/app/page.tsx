@@ -4,7 +4,12 @@ import { DialogProvider } from "@/contexts/DialogContext";
 
 export default function App() {
   return (
-    <ThemeProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="light"
+      enableSystem={false}
+      disableTransitionOnChange={false}
+    >
       <DialogProvider>
         <AppContent />
       </DialogProvider>
