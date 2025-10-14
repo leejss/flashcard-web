@@ -1,24 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { FolderPlus, Home, Plus } from "lucide-react";
-import { useIsMobile } from "@/components/ui/use-mobile";
-import { FolderForm } from "@/components/forms/folder-form";
-import { CardForm } from "@/components/forms/card-form";
+import { AddFolderButton } from "./add-folder-button";
+import { AddCardButton } from "./add-card-button";
 
 interface ActionButtonsProps {
   appView: "folders" | "cards";
@@ -45,7 +28,6 @@ export function ActionButtons({
   setIsAddFolderDialogOpen,
   isAddCardDialogOpen,
   setIsAddCardDialogOpen,
-  onGoBackToFolders,
   newFolderName,
   setNewFolderName,
   onCreateFolder,
@@ -55,101 +37,27 @@ export function ActionButtons({
   setNewBack,
   onAddCard,
 }: ActionButtonsProps) {
-  const isMobile = useIsMobile();
-
   if (appView === "folders") {
     return (
-      <Dialog
-        open={isAddFolderDialogOpen}
+      <AddFolderButton
+        isOpen={isAddFolderDialogOpen}
         onOpenChange={setIsAddFolderDialogOpen}
-      >
-        <DialogTrigger asChild>
-          <Button
-            className="fixed bottom-6 right-4 sm:top-24 sm:right-8 sm:bottom-auto z-50 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-gray-600 shadow-lg h-14 w-14 sm:w-auto sm:h-14 rounded-full sm:rounded-md p-0 sm:px-6"
-            size="lg"
-          >
-            <FolderPlus className="w-6 h-6 sm:w-5 sm:h-5 sm:mr-2" />
-            <span className="hidden sm:inline">New Folder</span>
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="border-2 border-black dark:border-gray-600 max-w-md dark:bg-gray-900">
-          <DialogHeader>
-            <DialogTitle className="dark:text-white">
-              Create New Folder
-            </DialogTitle>
-          </DialogHeader>
-          <FolderForm
-            folderName={newFolderName}
-            onFolderNameChange={setNewFolderName}
-            onSubmit={onCreateFolder}
-          />
-        </DialogContent>
-      </Dialog>
+        folderName={newFolderName}
+        onFolderNameChange={setNewFolderName}
+        onSubmit={onCreateFolder}
+      />
     );
   }
 
   return (
-    <>
-      {isMobile ? (
-        <Drawer
-          open={isAddCardDialogOpen}
-          onOpenChange={setIsAddCardDialogOpen}
-        >
-          <DrawerTrigger asChild>
-            <Button
-              className="fixed bottom-6 right-4 z-50 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-gray-600 shadow-lg h-14 w-14 rounded-full p-0"
-              size="lg"
-            >
-              <Plus className="w-6 h-6" />
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="border-2 border-black dark:border-gray-600 border-b-0 max-h-[90vh] dark:bg-gray-900">
-            <DrawerHeader>
-              <DrawerTitle className="dark:text-white">
-                Add New Flashcard
-              </DrawerTitle>
-            </DrawerHeader>
-            <div className="overflow-y-auto">
-              <CardForm
-                front={newFront}
-                back={newBack}
-                onFrontChange={setNewFront}
-                onBackChange={setNewBack}
-                onSubmit={onAddCard}
-              />
-            </div>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog
-          open={isAddCardDialogOpen}
-          onOpenChange={setIsAddCardDialogOpen}
-        >
-          <DialogTrigger asChild>
-            <Button
-              className="fixed top-24 right-8 z-50 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-gray-600 shadow-lg h-14 px-6"
-              size="lg"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add Card
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="border-2 border-black dark:border-gray-600 max-w-3xl dark:bg-gray-900">
-            <DialogHeader>
-              <DialogTitle className="dark:text-white">
-                Add New Flashcard
-              </DialogTitle>
-            </DialogHeader>
-            <CardForm
-              front={newFront}
-              back={newBack}
-              onFrontChange={setNewFront}
-              onBackChange={setNewBack}
-              onSubmit={onAddCard}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
-    </>
+    <AddCardButton
+      isOpen={isAddCardDialogOpen}
+      onOpenChange={setIsAddCardDialogOpen}
+      front={newFront}
+      back={newBack}
+      onFrontChange={setNewFront}
+      onBackChange={setNewBack}
+      onSubmit={onAddCard}
+    />
   );
 }
