@@ -1,0 +1,20 @@
+export interface Card {
+  id: string;
+  front: string;
+  back: string;
+  correct: number;
+  incorrect: number;
+  lastReviewed?: string;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  cards: Card[];
+}
+
+export interface BaseStorage {
+  load<T>(): Promise<T[]>;
+  save<T>(key: string, data: T[]): Promise<void>;
+  remove(key: string): Promise<void>;
+}

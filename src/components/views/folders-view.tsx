@@ -8,25 +8,16 @@ import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
 import { FolderOpen } from "lucide-react";
 import { useFlashcard } from "@/contexts/flashcard-context";
 import { toast } from "sonner";
-
-export interface Card {
-  id: string;
-  front: string;
-  back: string;
-  correct: number;
-  incorrect: number;
-  lastReviewed?: string;
-}
-
-export interface Folder {
-  id: string;
-  name: string;
-  cards: Card[];
-}
+import { Folder } from "@/types";
 
 export function FoldersView() {
-  const { folders, updateFolder, deleteFolder, setCurrentFolderId, setAppView } =
-    useFlashcard();
+  const {
+    folders,
+    updateFolder,
+    deleteFolder,
+    setCurrentFolderId,
+    setAppView,
+  } = useFlashcard();
 
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [deletingFolderId, setDeletingFolderId] = useState<string | null>(null);

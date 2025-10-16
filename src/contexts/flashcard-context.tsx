@@ -1,5 +1,7 @@
 "use client";
 
+import { browserStorage } from "@/storage/local-storage";
+import { Card, Folder } from "@/types";
 import {
   createContext,
   useContext,
@@ -10,7 +12,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Folder, Card } from "@/components/views/folders-view";
 
 type AppView = "folders" | "cards";
 type ViewMode = "list" | "focus";
@@ -212,27 +213,18 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
   const { folders, currentFolderId, appView, viewMode } = state;
   const [isHydrating, setIsHydrating] = useState(true);
 
-  // Load data from localStorage after hydration
   useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as Folder[];
-        if (Array.isArray(parsed)) {
-          dispatch({ type: "SET_FOLDERS", payload: parsed });
-        }
-      } catch (error) {
-        console.error("Failed to load data:", error);
-        window.localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-    setIsHydrating(false);
+    const load = async () => {
+      const loaded = await browserStorage.load<Folder>();
+      dispatch({ type: "SET_FOLDERS", payload: loaded });
+      setIsHydrating(false);
+    };
+    load();
   }, []);
 
-  // Save data to localStorage whenever folders change
   useEffect(() => {
     if (!isHydrating && folders.length > 0) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(folders));
+      browserStorage.save(STORAGE_KEY, folders);
     }
   }, [folders, isHydrating]);
 
