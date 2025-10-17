@@ -1,12 +1,12 @@
 "use client";
 
-import { FoldersView } from "@/components/views/folders-view";
 import { Header } from "@/components/layout/header";
 import { ActionButtons } from "@/components/layout/action-buttons";
 import { useFlashcardState } from "@/contexts/flashcard-hooks";
 import { Toaster } from "sonner";
+import { CardsFocusView } from "@/components/views/cards-focus-view";
 
-export default function FoldersPage() {
+export default function FocusPage() {
   const { isHydrating } = useFlashcardState();
 
   if (isHydrating) {
@@ -26,7 +26,7 @@ export default function FoldersPage() {
       <Header />
       <ActionButtons />
       <main className="flex-1 px-4 sm:px-8 py-6 sm:py-12 pb-24 sm:pb-12">
-        <FoldersView />
+        <CardsFocusView />
       </main>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FolderCard } from "../folder-card";
 import { EmptyState } from "../empty-state";
 import { EditFolderDialog } from "../dialogs/edit-folder-dialog";
@@ -12,8 +13,9 @@ import { toast } from "sonner";
 import { Folder } from "@/types";
 
 export function FoldersView() {
+  const router = useRouter();
   const { state } = useFlashcardState();
-  const { updateFolder, deleteFolder, setCurrentFolderId, setAppView } = useFlashcardActions();
+  const { updateFolder, deleteFolder, setCurrentFolderId } = useFlashcardActions();
   const { folders } = state;
 
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export function FoldersView() {
 
   const handleFolderClick = (folderId: string) => {
     setCurrentFolderId(folderId);
-    setAppView("cards");
+    router.push("/view/list");
   };
 
   const handleEditFolder = (name: string) => {

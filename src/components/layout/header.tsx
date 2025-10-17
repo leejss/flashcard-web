@@ -1,27 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Focus, List, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useFlashcardState } from "@/contexts/flashcard-hooks";
 import { useFlashcardActions } from "@/contexts/flashcard-hooks";
 
 export function Header() {
-  const { state } = useFlashcardState();
-  const { setViewMode, setAppView, setCurrentFolderId, getCurrentFolder } =
-    useFlashcardActions();
-  const { appView, viewMode } = state;
+  const router = useRouter();
+  const pathname = usePathname();
+  const { setCurrentFolderId, getCurrentFolder } = useFlashcardActions();
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const currentFolder = getCurrentFolder();
   const hasCards = (currentFolder?.cards.length || 0) > 0;
+  const isViewPage = pathname.startsWith("/view");
+  const isListView = pathname === "/view/list";
 
   const goBackToFolders = () => {
-    setAppView("folders");
     setCurrentFolderId(null);
-    setViewMode("list");
+    router.push("/");
+  };
+
+  const toggleViewMode = () => {
+    if (isListView) {
+      router.push("/view/focus");
+    } else {
+      router.push("/view/list");
+    }
   };
 
   useEffect(() => {
@@ -37,16 +45,16 @@ export function Header() {
       <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
           <button
-            onClick={appView === "cards" ? goBackToFolders : undefined}
+            onClick={isViewPage ? goBackToFolders : undefined}
             className={`text-lg sm:text-2xl font-mono truncate dark:text-white ${
-              appView === "cards"
+              isViewPage
                 ? "hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer transition-colors"
                 : ""
             }`}
           >
             Flashcards
           </button>
-          {appView === "cards" && currentFolder?.name && (
+          {isViewPage && currentFolder?.name && (
             <>
               <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
               <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
@@ -74,16 +82,14 @@ export function Header() {
           </Button>
 
           {/* View Mode Toggle - only show in cards view */}
-          {appView === "cards" && hasCards && (
+          {isViewPage && hasCards && (
             <Button
               variant="outline"
-              onClick={() =>
-                setViewMode(viewMode === "list" ? "focus" : "list")
-              }
+              onClick={toggleViewMode}
               size="sm"
               className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-9 sm:h-10"
             >
-              {viewMode === "list" ? (
+              {isListView ? (
                 <>
                   <Focus className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">Focus</span>

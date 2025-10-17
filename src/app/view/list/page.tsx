@@ -1,15 +1,13 @@
 "use client";
 
+import { Header } from "@/components/layout/header";
+import { ActionButtons } from "@/components/layout/action-buttons";
 import { useFlashcardState } from "@/contexts/flashcard-hooks";
 import { Toaster } from "sonner";
-import { ActionButtons } from "./layout/action-buttons";
-import { Header } from "./layout/header";
-import { CardsView } from "./views/cards-view";
-import { FoldersView } from "./views/folders-view";
+import { CardsListView } from "@/components/views/cards-list-view";
 
-export function AppContent() {
-  const { state, isHydrating } = useFlashcardState();
-  const { appView, viewMode } = state;
+export default function ListPage() {
+  const { isHydrating } = useFlashcardState();
 
   if (isHydrating) {
     return (
@@ -28,11 +26,7 @@ export function AppContent() {
       <Header />
       <ActionButtons />
       <main className="flex-1 px-4 sm:px-8 py-6 sm:py-12 pb-24 sm:pb-12">
-        {appView === "folders" ? (
-          <FoldersView />
-        ) : (
-          <CardsView viewMode={viewMode} />
-        )}
+        <CardsListView />
       </main>
     </div>
   );

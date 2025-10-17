@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import { DialogProvider } from "@/contexts/dialog-context";
+import { FlashcardProvider } from "@/contexts/flashcard-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +30,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange={false}
+        >
+          <FlashcardProvider>
+            <DialogProvider>
+              {children}
+            </DialogProvider>
+          </FlashcardProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
