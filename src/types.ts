@@ -13,8 +13,8 @@ export interface Folder {
   cards: Card[];
 }
 
-export interface BaseStorage {
-  load<T>(): Promise<T[]>;
-  save<T>(key: string, data: T[]): Promise<void>;
+export interface StorageAdapter {
+  load<T>(): Promise<T>;
+  save<T>(key: string, data: T): Promise<void>;
   remove(key: string): Promise<void>;
 }
