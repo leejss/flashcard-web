@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,18 +21,9 @@ export function CardForm({
   onSubmit,
   isEdit = false,
 }: CardFormProps) {
-  const [isWritingAnswer, setIsWritingAnswer] = useState(false);
-
-  const handleWriteAnswer = () => {
-    if (front.trim()) {
-      setIsWritingAnswer(true);
-    }
-  };
-
   const handleAddCard = () => {
     if (front.trim() && back.trim()) {
       onSubmit();
-      setIsWritingAnswer(false);
     }
   };
 
@@ -48,7 +38,7 @@ export function CardForm({
               placeholder="Enter the question or prompt..."
               value={front}
               onChange={(e) => onFrontChange(e.target.value)}
-              className="border-0 focus-visible:ring-0 flex-1 resize-none p-0 bg-white dark:bg-gray-900"
+              className="border-0 break-words overflow-y-auto break-all focus-visible:ring-0 h-[160px] sm:h-[200px] resize-none p-0 bg-white dark:bg-gray-900"
             />
           </div>
         </div>
@@ -63,31 +53,11 @@ export function CardForm({
               placeholder="Enter the answer..."
               value={back}
               onChange={(e) => onBackChange(e.target.value)}
-              className={`border-0 focus-visible:ring-0 flex-1 resize-none p-0 bg-white dark:bg-gray-900`}
+              className={`border-0 break-words break-all overflow-y-auto focus-visible:ring-0 h-[160px] sm:h-[200px] resize-none p-0 bg-white dark:bg-gray-900`}
             />
           </div>
         </div>
       </div>
-
-      {/* {!isWritingAnswer && (
-        <Button
-          onClick={handleWriteAnswer}
-          disabled={!front.trim()}
-          className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed h-12"
-        >
-          Next
-        </Button>
-      )}
-
-      {isWritingAnswer && (
-        <Button
-          onClick={handleAddCard}
-          disabled={!back.trim()}
-          className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed h-12"
-        >
-          {isEdit ? "Save Changes" : "Add Card"}
-        </Button>
-      )} */}
       <Button
         onClick={handleAddCard}
         disabled={!back.trim() || !front.trim()}

@@ -11,15 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { Switch } from "@/components/ui/switch";
-import { useIsMobile } from "@/components/ui/use-mobile";
 import { CardForm } from "../forms/card-form";
 import {
   ChevronLeft,
@@ -43,9 +35,9 @@ interface CardsViewProps {
 
 export function CardsView({ viewMode }: CardsViewProps) {
   const { state } = useFlashcardState();
-  const { getCurrentFolder, updateCard, deleteCard, updateCardStats } = useFlashcardActions();
+  const { getCurrentFolder, updateCard, deleteCard, updateCardStats } =
+    useFlashcardActions();
   const { currentFolderId } = state;
-  const isMobile = useIsMobile();
 
   const currentFolder = getCurrentFolder();
   const cards = currentFolder?.cards || [];
@@ -235,85 +227,48 @@ export function CardsView({ viewMode }: CardsViewProps) {
                     </div>
                   )}
                   <div className="flex justify-end gap-2 mt-2">
-                    {isMobile ? (
-                      <Drawer
-                        open={editingCardIndex === index}
-                        onOpenChange={(open) => {
-                          if (!open) setEditingCardIndex(null);
-                        }}
-                      >
-                        <DrawerTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openEditCardDialog(index)}
-                            className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-9"
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </Button>
-                        </DrawerTrigger>
-                        <DrawerContent className="border-2 border-black dark:border-gray-600 border-b-0 max-h-[90vh] dark:bg-gray-900">
-                          <DrawerHeader>
-                            <DrawerTitle className="dark:text-white">
-                              Edit Flashcard
-                            </DrawerTitle>
-                          </DrawerHeader>
-                          <div className="overflow-y-auto">
-                            <CardForm
-                              front={newFront}
-                              back={newBack}
-                              onFrontChange={setNewFront}
-                              onBackChange={setNewBack}
-                              onSubmit={handleEditCard}
-                              isEdit
-                            />
-                          </div>
-                        </DrawerContent>
-                      </Drawer>
-                    ) : (
-                      <Dialog
-                        open={editingCardIndex === index}
-                        onOpenChange={(open) => {
-                          if (!open) {
-                            setEditingCardIndex(null);
-                            setNewFront("");
-                            setNewBack("");
-                          }
-                        }}
-                      >
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openEditCardDialog(index)}
-                            className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="border-2 border-black dark:border-gray-600 max-w-3xl dark:bg-gray-900">
-                          <DialogHeader>
-                            <DialogTitle className="dark:text-white">
-                              Edit Flashcard
-                            </DialogTitle>
-                          </DialogHeader>
-                          <CardForm
-                            front={newFront}
-                            back={newBack}
-                            onFrontChange={setNewFront}
-                            onBackChange={setNewBack}
-                            onSubmit={handleEditCard}
-                            isEdit
-                          />
-                        </DialogContent>
-                      </Dialog>
-                    )}
+                    <Dialog
+                      open={editingCardIndex === index}
+                      onOpenChange={(open) => {
+                        if (!open) {
+                          setEditingCardIndex(null);
+                          setNewFront("");
+                          setNewBack("");
+                        }
+                      }}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEditCardDialog(index)}
+                          className="border-2 size-10 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="border-2 border-black dark:border-gray-600 max-w-3xl dark:bg-gray-900">
+                        <DialogHeader>
+                          <DialogTitle className="dark:text-white">
+                            Edit Flashcard
+                          </DialogTitle>
+                        </DialogHeader>
+                        <CardForm
+                          front={newFront}
+                          back={newBack}
+                          onFrontChange={setNewFront}
+                          onBackChange={setNewBack}
+                          onSubmit={handleEditCard}
+                          isEdit
+                        />
+                      </DialogContent>
+                    </Dialog>
 
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setDeletingCardIndex(index)}
-                      className="border-2 border-black dark:border-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors h-9"
+                      className="border-2 size-10 border-black dark:border-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>
@@ -411,100 +366,52 @@ export function CardsView({ viewMode }: CardsViewProps) {
             </Button>
 
             <div className="flex gap-2">
-              {isMobile ? (
-                <Drawer
-                  open={
-                    editingCardIndex ===
-                    (isShuffled
-                      ? shuffledIndices[currentCardIndex]
-                      : currentCardIndex)
+              <Dialog
+                open={
+                  editingCardIndex ===
+                  (isShuffled
+                    ? shuffledIndices[currentCardIndex]
+                    : currentCardIndex)
+                }
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setEditingCardIndex(null);
+                    setNewFront("");
+                    setNewBack("");
                   }
-                  onOpenChange={(open) => {
-                    if (!open) setEditingCardIndex(null);
-                  }}
-                >
-                  <DrawerTrigger asChild>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        openEditCardDialog(
-                          isShuffled
-                            ? shuffledIndices[currentCardIndex]
-                            : currentCardIndex,
-                        )
-                      }
-                      className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-10"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                  </DrawerTrigger>
-                  <DrawerContent className="border-2 border-black dark:border-gray-600 border-b-0 max-h-[90vh] dark:bg-gray-900">
-                    <DrawerHeader>
-                      <DrawerTitle className="dark:text-white">
-                        Edit Flashcard
-                      </DrawerTitle>
-                    </DrawerHeader>
-                    <div className="overflow-y-auto">
-                      <CardForm
-                        front={newFront}
-                        back={newBack}
-                        onFrontChange={setNewFront}
-                        onBackChange={setNewBack}
-                        onSubmit={handleEditCard}
-                        isEdit
-                      />
-                    </div>
-                  </DrawerContent>
-                </Drawer>
-              ) : (
-                <Dialog
-                  open={
-                    editingCardIndex ===
-                    (isShuffled
-                      ? shuffledIndices[currentCardIndex]
-                      : currentCardIndex)
-                  }
-                  onOpenChange={(open) => {
-                    if (!open) {
-                      setEditingCardIndex(null);
-                      setNewFront("");
-                      setNewBack("");
+                }}
+              >
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      openEditCardDialog(
+                        isShuffled
+                          ? shuffledIndices[currentCardIndex]
+                          : currentCardIndex,
+                      )
                     }
-                  }}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        openEditCardDialog(
-                          isShuffled
-                            ? shuffledIndices[currentCardIndex]
-                            : currentCardIndex,
-                        )
-                      }
-                      className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="border-2 border-black dark:border-gray-600 max-w-3xl dark:bg-gray-900">
-                    <DialogHeader>
-                      <DialogTitle className="dark:text-white">
-                        Edit Flashcard
-                      </DialogTitle>
-                    </DialogHeader>
-                    <CardForm
-                      front={newFront}
-                      back={newBack}
-                      onFrontChange={setNewFront}
-                      onBackChange={setNewBack}
-                      onSubmit={handleEditCard}
-                      isEdit
-                    />
-                  </DialogContent>
-                </Dialog>
-              )}
-
+                    className="border-2 size-10 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="border-2 border-black dark:border-gray-600 max-w-3xl dark:bg-gray-900">
+                  <DialogHeader>
+                    <DialogTitle className="dark:text-white">
+                      Edit Flashcard
+                    </DialogTitle>
+                  </DialogHeader>
+                  <CardForm
+                    front={newFront}
+                    back={newBack}
+                    onFrontChange={setNewFront}
+                    onBackChange={setNewBack}
+                    onSubmit={handleEditCard}
+                    isEdit
+                  />
+                </DialogContent>
+              </Dialog>
               <Button
                 variant="outline"
                 onClick={() =>
@@ -514,7 +421,7 @@ export function CardsView({ viewMode }: CardsViewProps) {
                       : currentCardIndex,
                   )
                 }
-                className="border-2 border-black dark:border-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors h-10"
+                className="border-2 size-10 border-black dark:border-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors h-10"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
