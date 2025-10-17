@@ -1,6 +1,6 @@
 import type { StorageAdapter } from "@/types";
 
-export class LocalStorageAdapter implements StorageAdapter {
+class LocalStorageAdapter implements StorageAdapter {
   private storageKey = "flashcard-data";
 
   async load<T = unknown>(): Promise<T> {
@@ -30,3 +30,5 @@ export class LocalStorageAdapter implements StorageAdapter {
     }
   }
 }
+
+export const localStorageAdapter = new LocalStorageAdapter();

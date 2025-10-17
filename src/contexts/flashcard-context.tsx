@@ -1,24 +1,26 @@
 "use client";
 
-import { browserStorage } from "@/storage/local-storage";
+import { localStorageAdapter } from "@/storage/local-storage";
+import { SyncManager } from "@/storage/sync";
 import { Card, Folder } from "@/types";
 import {
   createContext,
+  useCallback,
   useContext,
-  useReducer,
   useEffect,
   useMemo,
-  useCallback,
+  useReducer,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { flashcardReducer } from "./flashcard-reducer";
 import {
-  FlashcardState,
-  FlashcardActions,
   AppView,
+  FlashcardActions,
+  FlashcardState,
   ViewMode,
 } from "./flashcard-types";
-import { flashcardReducer } from "./flashcard-reducer";
 
 const STORAGE_KEY = "flashcard-data";
 const createDefaultFolders = (): Folder[] => [];
@@ -38,6 +40,7 @@ const FlashcardContext = createContext<FlashcardContextType | undefined>(
 );
 
 export function FlashcardProvider({ children }: { children: ReactNode }) {
+  const syncManager = useRef(new SyncManager(localStorageAdapter));
   const [state, dispatch] = useReducer(
     flashcardReducer,
     {
@@ -54,7 +57,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const load = async () => {
-      const loaded = await browserStorage.load<Folder>();
+      const loaded = await syncManager.current.load<Folder[]>();
       dispatch({ type: "SET_FOLDERS", payload: loaded });
       setIsHydrating(false);
     };
@@ -63,7 +66,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isHydrating && folders.length > 0) {
-      browserStorage.save(STORAGE_KEY, folders);
+      syncManager.current.save(STORAGE_KEY, folders);
     }
   }, [folders, isHydrating]);
 
