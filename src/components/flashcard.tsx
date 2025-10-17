@@ -28,7 +28,7 @@ export function Flashcard({ front, back }: FlashcardProps) {
       >
         {/* Front of card */}
         <div
-          className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-900 border-2 border-black dark:border-gray-600 rounded-lg"
+          className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-900 border-2 border-black dark:border-gray-600 rounded-sm"
           style={{ backfaceVisibility: "hidden" }}
         >
           <p className="text-center text-xs sm:text-sm dark:text-white">
@@ -38,7 +38,7 @@ export function Flashcard({ front, back }: FlashcardProps) {
 
         {/* Back of card */}
         <div
-          className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black dark:bg-white text-white dark:text-black border-2 border-black dark:border-gray-600 rounded-lg"
+          className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black dark:bg-white text-white dark:text-black border-2 border-black dark:border-gray-600 rounded-sm"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
           <p className="text-center text-xs sm:text-sm">{back}</p>

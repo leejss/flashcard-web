@@ -37,7 +37,7 @@ export function FolderCard({
     <div className="relative group">
       <div
         onClick={onClick}
-        className="flex flex-col items-center justify-center p-3 sm:p-4 border-2 border-black dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 active:bg-gray-50 dark:active:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors min-h-[110px] sm:min-h-[120px]"
+        className="flex flex-col items-center justify-center p-3 sm:p-4 border-2 border-black dark:border-gray-600 rounded-sm bg-white dark:bg-gray-900 active:bg-gray-50 dark:active:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors min-h-[110px] sm:min-h-[120px]"
       >
         <Folder
           className="w-10 h-10 sm:w-12 sm:h-12 mb-1 sm:mb-2 text-black dark:text-white"

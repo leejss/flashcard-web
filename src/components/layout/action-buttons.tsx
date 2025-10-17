@@ -46,10 +46,18 @@ export function ActionButtons() {
     );
   }
 
+  const handleCardDialogOpenChange = (open: boolean) => {
+    setIsAddCardDialogOpen(open);
+    if (!open) {
+      setNewFront("");
+      setNewBack("");
+    }
+  };
+
   return (
     <AddCardButton
       isOpen={isAddCardDialogOpen}
-      onOpenChange={setIsAddCardDialogOpen}
+      onOpenChange={handleCardDialogOpenChange}
       front={newFront}
       back={newBack}
       onFrontChange={setNewFront}

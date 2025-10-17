@@ -9,7 +9,8 @@ import { useFlashcardActions } from "@/contexts/flashcard-hooks";
 
 export function Header() {
   const { state } = useFlashcardState();
-  const { setViewMode, setAppView, setCurrentFolderId, getCurrentFolder } = useFlashcardActions();
+  const { setViewMode, setAppView, setCurrentFolderId, getCurrentFolder } =
+    useFlashcardActions();
   const { appView, viewMode } = state;
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -23,7 +24,6 @@ export function Header() {
     setViewMode("list");
   };
 
-  // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -38,7 +38,7 @@ export function Header() {
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
           <button
             onClick={appView === "cards" ? goBackToFolders : undefined}
-            className={`text-lg sm:text-2xl truncate dark:text-white ${
+            className={`text-lg sm:text-2xl font-mono truncate dark:text-white ${
               appView === "cards"
                 ? "hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer transition-colors"
                 : ""
@@ -48,7 +48,7 @@ export function Header() {
           </button>
           {appView === "cards" && currentFolder?.name && (
             <>
-              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-600 flex-shrink-0" />
+              <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
               <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
                 {currentFolder.name}
               </span>

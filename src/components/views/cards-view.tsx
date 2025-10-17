@@ -274,7 +274,11 @@ export function CardsView({ viewMode }: CardsViewProps) {
                       <Dialog
                         open={editingCardIndex === index}
                         onOpenChange={(open) => {
-                          if (!open) setEditingCardIndex(null);
+                          if (!open) {
+                            setEditingCardIndex(null);
+                            setNewFront("");
+                            setNewBack("");
+                          }
                         }}
                       >
                         <DialogTrigger asChild>
@@ -461,7 +465,11 @@ export function CardsView({ viewMode }: CardsViewProps) {
                       : currentCardIndex)
                   }
                   onOpenChange={(open) => {
-                    if (!open) setEditingCardIndex(null);
+                    if (!open) {
+                      setEditingCardIndex(null);
+                      setNewFront("");
+                      setNewBack("");
+                    }
                   }}
                 >
                   <DialogTrigger asChild>
