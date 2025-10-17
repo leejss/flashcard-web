@@ -4,17 +4,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Focus, List, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useFlashcard } from "@/contexts/flashcard-context";
+import { useFlashcardState } from "@/contexts/flashcard-hooks";
+import { useFlashcardActions } from "@/contexts/flashcard-hooks";
 
 export function Header() {
-  const {
-    appView,
-    viewMode,
-    setViewMode,
-    setAppView,
-    setCurrentFolderId,
-    getCurrentFolder,
-  } = useFlashcard();
+  const { state } = useFlashcardState();
+  const { setViewMode, setAppView, setCurrentFolderId, getCurrentFolder } = useFlashcardActions();
+  const { appView, viewMode } = state;
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 

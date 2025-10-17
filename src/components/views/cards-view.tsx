@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { EmptyState } from "../empty-state";
 import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -31,8 +31,9 @@ import {
   XCircle,
   FileQuestion,
 } from "lucide-react";
-import type { Card } from "./folders-view";
-import { useFlashcard } from "@/contexts/flashcard-context";
+import type { Card } from "@/types";
+import { useFlashcardState } from "@/contexts/flashcard-hooks";
+import { useFlashcardActions } from "@/contexts/flashcard-hooks";
 import { toast } from "sonner";
 import { Flashcard } from "../flashcard";
 
@@ -41,13 +42,9 @@ interface CardsViewProps {
 }
 
 export function CardsView({ viewMode }: CardsViewProps) {
-  const {
-    currentFolderId,
-    getCurrentFolder,
-    updateCard,
-    deleteCard,
-    updateCardStats,
-  } = useFlashcard();
+  const { state } = useFlashcardState();
+  const { getCurrentFolder, updateCard, deleteCard, updateCardStats } = useFlashcardActions();
+  const { currentFolderId } = state;
   const isMobile = useIsMobile();
 
   const currentFolder = getCurrentFolder();
@@ -69,6 +66,33 @@ export function CardsView({ viewMode }: CardsViewProps) {
       : cards;
 
   const currentCard = displayCards[currentCardIndex];
+
+  const shuffleArray = (array: number[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  const handleNext = useCallback(() => {
+    setCurrentCardIndex((prev) => {
+      if (prev < displayCards.length - 1) {
+        return prev + 1;
+      }
+      return prev;
+    });
+  }, [displayCards.length]);
+
+  const handlePrevious = useCallback(() => {
+    setCurrentCardIndex((prev) => {
+      if (prev > 0) {
+        return prev - 1;
+      }
+      return prev;
+    });
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -95,16 +119,7 @@ export function CardsView({ viewMode }: CardsViewProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [viewMode, currentCardIndex, displayCards.length]);
-
-  const shuffleArray = (array: number[]) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
+  }, [viewMode, handleNext, handlePrevious]);
 
   const toggleShuffle = () => {
     if (!isShuffled) {
@@ -119,18 +134,6 @@ export function CardsView({ viewMode }: CardsViewProps) {
       setShuffledIndices([]);
       setCurrentCardIndex(0);
       toast.success("Shuffle mode disabled");
-    }
-  };
-
-  const handleNext = () => {
-    if (currentCardIndex < displayCards.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
     }
   };
 

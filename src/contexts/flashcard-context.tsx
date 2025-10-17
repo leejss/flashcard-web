@@ -12,186 +12,25 @@ import {
   useState,
   type ReactNode,
 } from "react";
-
-type AppView = "folders" | "cards";
-type ViewMode = "list" | "focus";
-
-interface FlashcardState {
-  folders: Folder[];
-  currentFolderId: string | null;
-  appView: AppView;
-  viewMode: ViewMode;
-}
-
-type FlashcardAction =
-  | { type: "SET_FOLDERS"; payload: Folder[] }
-  | { type: "SET_CURRENT_FOLDER"; payload: string | null }
-  | { type: "SET_APP_VIEW"; payload: AppView }
-  | { type: "SET_VIEW_MODE"; payload: ViewMode }
-  | { type: "CREATE_FOLDER"; payload: Folder }
-  | { type: "UPDATE_FOLDER"; payload: { id: string; name: string } }
-  | { type: "DELETE_FOLDER"; payload: { id: string } }
-  | { type: "CREATE_CARD"; payload: { folderId: string; card: Card } }
-  | {
-      type: "UPDATE_CARD";
-      payload: { folderId: string; index: number; front: string; back: string };
-    }
-  | { type: "DELETE_CARD"; payload: { folderId: string; index: number } }
-  | {
-      type: "UPDATE_CARD_STATS";
-      payload: {
-        folderId: string;
-        index: number;
-        isCorrect: boolean;
-        lastReviewed: string;
-      };
-    };
+import {
+  FlashcardState,
+  FlashcardActions,
+  AppView,
+  ViewMode,
+} from "./flashcard-types";
+import { flashcardReducer } from "./flashcard-reducer";
 
 const STORAGE_KEY = "flashcard-data";
 const createDefaultFolders = (): Folder[] => [];
-const updateFolderCards = (
-  folders: Folder[],
-  folderId: string,
-  updater: (cards: Card[]) => Card[],
-): Folder[] =>
-  folders.map((folder) =>
-    folder.id === folderId
-      ? { ...folder, cards: updater(folder.cards) }
-      : folder,
-  );
-
-const flashcardReducer = (
-  state: FlashcardState,
-  action: FlashcardAction,
-): FlashcardState => {
-  switch (action.type) {
-    case "SET_FOLDERS":
-      return { ...state, folders: action.payload };
-    case "SET_CURRENT_FOLDER":
-      return { ...state, currentFolderId: action.payload };
-    case "SET_APP_VIEW":
-      return { ...state, appView: action.payload };
-    case "SET_VIEW_MODE":
-      return { ...state, viewMode: action.payload };
-    case "CREATE_FOLDER":
-      return { ...state, folders: [...state.folders, action.payload] };
-    case "UPDATE_FOLDER":
-      return {
-        ...state,
-        folders: state.folders.map((folder) =>
-          folder.id === action.payload.id
-            ? { ...folder, name: action.payload.name }
-            : folder,
-        ),
-      };
-    case "DELETE_FOLDER":
-      return {
-        ...state,
-        folders: state.folders.filter(
-          (folder) => folder.id !== action.payload.id,
-        ),
-      };
-    case "CREATE_CARD":
-      return {
-        ...state,
-        folders: updateFolderCards(
-          state.folders,
-          action.payload.folderId,
-          (cards) => [...cards, action.payload.card],
-        ),
-      };
-    case "UPDATE_CARD":
-      return {
-        ...state,
-        folders: updateFolderCards(
-          state.folders,
-          action.payload.folderId,
-          (cards) => {
-            if (!cards[action.payload.index]) {
-              return cards;
-            }
-            const nextCards = [...cards];
-            nextCards[action.payload.index] = {
-              ...nextCards[action.payload.index],
-              front: action.payload.front,
-              back: action.payload.back,
-            };
-            return nextCards;
-          },
-        ),
-      };
-    case "DELETE_CARD":
-      return {
-        ...state,
-        folders: updateFolderCards(
-          state.folders,
-          action.payload.folderId,
-          (cards) => cards.filter((_, idx) => idx !== action.payload.index),
-        ),
-      };
-    case "UPDATE_CARD_STATS":
-      return {
-        ...state,
-        folders: updateFolderCards(
-          state.folders,
-          action.payload.folderId,
-          (cards) => {
-            if (!cards[action.payload.index]) {
-              return cards;
-            }
-            const nextCards = [...cards];
-            const targetCard = nextCards[action.payload.index];
-            nextCards[action.payload.index] = {
-              ...targetCard,
-              correct: action.payload.isCorrect
-                ? targetCard.correct + 1
-                : targetCard.correct,
-              incorrect: action.payload.isCorrect
-                ? targetCard.incorrect
-                : targetCard.incorrect + 1,
-              lastReviewed: action.payload.lastReviewed,
-            };
-            return nextCards;
-          },
-        ),
-      };
-    default: {
-      return state;
-    }
-  }
-};
 
 const initializeState = (baseState: FlashcardState): FlashcardState => {
   return { ...baseState, folders: createDefaultFolders() };
 };
 
 interface FlashcardContextType {
-  folders: Folder[];
-  currentFolderId: string | null;
-  appView: AppView;
-  viewMode: ViewMode;
+  state: FlashcardState;
   isHydrating: boolean;
-  setFolders: (folders: Folder[]) => void;
-  setCurrentFolderId: (id: string | null) => void;
-  setAppView: (view: AppView) => void;
-  setViewMode: (mode: ViewMode) => void;
-  createFolder: (name: string) => void;
-  updateFolder: (id: string, name: string) => void;
-  deleteFolder: (id: string) => void;
-  createCard: (folderId: string, front: string, back: string) => void;
-  updateCard: (
-    folderId: string,
-    index: number,
-    front: string,
-    back: string,
-  ) => void;
-  deleteCard: (folderId: string, index: number) => void;
-  updateCardStats: (
-    folderId: string,
-    index: number,
-    isCorrect: boolean,
-  ) => void;
-  getCurrentFolder: () => Folder | undefined;
+  actions: FlashcardActions;
 }
 
 const FlashcardContext = createContext<FlashcardContextType | undefined>(
@@ -210,7 +49,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
     initializeState,
   );
 
-  const { folders, currentFolderId, appView, viewMode } = state;
+  const { folders, currentFolderId } = state;
   const [isHydrating, setIsHydrating] = useState(true);
 
   useEffect(() => {
@@ -334,29 +173,25 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
 
   const contextValue = useMemo(
     () => ({
-      folders,
-      currentFolderId,
-      appView,
-      viewMode,
+      state,
       isHydrating,
-      setFolders,
-      setCurrentFolderId,
-      setAppView,
-      setViewMode,
-      createFolder,
-      updateFolder,
-      deleteFolder,
-      createCard,
-      updateCard,
-      deleteCard,
-      updateCardStats,
-      getCurrentFolder,
+      actions: {
+        setFolders,
+        setCurrentFolderId,
+        setAppView,
+        setViewMode,
+        createFolder,
+        updateFolder,
+        deleteFolder,
+        createCard,
+        updateCard,
+        deleteCard,
+        updateCardStats,
+        getCurrentFolder,
+      },
     }),
     [
-      folders,
-      currentFolderId,
-      appView,
-      viewMode,
+      state,
       isHydrating,
       setFolders,
       setCurrentFolderId,

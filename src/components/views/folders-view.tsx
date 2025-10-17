@@ -6,18 +6,15 @@ import { EmptyState } from "../empty-state";
 import { EditFolderDialog } from "../dialogs/edit-folder-dialog";
 import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
 import { FolderOpen } from "lucide-react";
-import { useFlashcard } from "@/contexts/flashcard-context";
+import { useFlashcardState } from "@/contexts/flashcard-hooks";
+import { useFlashcardActions } from "@/contexts/flashcard-hooks";
 import { toast } from "sonner";
 import { Folder } from "@/types";
 
 export function FoldersView() {
-  const {
-    folders,
-    updateFolder,
-    deleteFolder,
-    setCurrentFolderId,
-    setAppView,
-  } = useFlashcard();
+  const { state } = useFlashcardState();
+  const { updateFolder, deleteFolder, setCurrentFolderId, setAppView } = useFlashcardActions();
+  const { folders } = state;
 
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [deletingFolderId, setDeletingFolderId] = useState<string | null>(null);

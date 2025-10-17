@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { AddFolderButton } from "./add-folder-button";
 import { AddCardButton } from "./add-card-button";
-import { useFlashcard } from "@/contexts/flashcard-context";
+import { useFlashcardState } from "@/contexts/flashcard-hooks";
+import { useFlashcardActions } from "@/contexts/flashcard-hooks";
 
 export function ActionButtons() {
-  const { appView, currentFolderId, createFolder, createCard } = useFlashcard();
+  const { state } = useFlashcardState();
+  const { createFolder, createCard } = useFlashcardActions();
+  const { appView, currentFolderId } = state;
   
   const [isAddFolderDialogOpen, setIsAddFolderDialogOpen] = useState(false);
   const [isAddCardDialogOpen, setIsAddCardDialogOpen] = useState(false);

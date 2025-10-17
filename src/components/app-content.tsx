@@ -1,6 +1,6 @@
 "use client";
 
-import { useFlashcard } from "@/contexts/flashcard-context";
+import { useFlashcardState } from "@/contexts/flashcard-hooks";
 import { Toaster } from "sonner";
 import { ActionButtons } from "./layout/action-buttons";
 import { Header } from "./layout/header";
@@ -8,7 +8,8 @@ import { CardsView } from "./views/cards-view";
 import { FoldersView } from "./views/folders-view";
 
 export function AppContent() {
-  const { appView, viewMode, isHydrating } = useFlashcard();
+  const { state, isHydrating } = useFlashcardState();
+  const { appView, viewMode } = state;
 
   if (isHydrating) {
     return (
