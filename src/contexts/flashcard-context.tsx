@@ -3,6 +3,7 @@
 import { localStorageAdapter } from "@/storage/local-storage";
 import { SyncManager } from "@/storage/sync";
 import { Card, Folder } from "@/types";
+import { generateId } from "@/utils/id-generator";
 import {
   createContext,
   useCallback,
@@ -101,7 +102,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
   const createFolder = useCallback(
     (name: string) => {
       const newFolder: Folder = {
-        id: Date.now().toString(),
+        id: generateId(),
         name,
         cards: [],
       };
@@ -127,7 +128,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
   const createCard = useCallback(
     (folderId: string, front: string, back: string) => {
       const newCard: Card = {
-        id: Date.now().toString(),
+        id: generateId(),
         front,
         back,
         correct: 0,
