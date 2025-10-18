@@ -3,7 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DialogProvider } from "@/contexts/dialog-context";
 import { FlashcardProvider } from "@/contexts/flashcard-context";
+import { HydrationProvider } from "@/contexts/hydration-provider";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +38,12 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange={false}
         >
-          <FlashcardProvider>
-            <DialogProvider>
-              {children}
-            </DialogProvider>
-          </FlashcardProvider>
+          <Toaster position="top-right" />
+          <HydrationProvider>
+            <FlashcardProvider>
+              <DialogProvider>{children}</DialogProvider>
+            </FlashcardProvider>
+          </HydrationProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -15,7 +15,8 @@ import { Folder } from "@/types";
 export function FoldersView() {
   const router = useRouter();
   const { state } = useFlashcardState();
-  const { updateFolder, deleteFolder, setCurrentFolderId } = useFlashcardActions();
+  const { updateFolder, deleteFolder, setCurrentFolderId } =
+    useFlashcardActions();
   const { folders } = state;
 
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
@@ -61,7 +62,7 @@ export function FoldersView() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative">
         <div className="mb-4 sm:mb-6">
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             {folders.length} folder{folders.length !== 1 ? "s" : ""}
