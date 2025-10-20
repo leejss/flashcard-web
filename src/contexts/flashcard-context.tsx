@@ -58,6 +58,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const load = async () => {
+      // await syncManager.init()
       const loaded = await syncManager.current.load<Folder[]>();
       dispatch({ type: "SET_FOLDERS", payload: loaded });
       setIsHydrating(false);
@@ -107,6 +108,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
         cards: [],
       };
       dispatch({ type: "CREATE_FOLDER", payload: newFolder });
+      // createFolder
     },
     [dispatch],
   );
