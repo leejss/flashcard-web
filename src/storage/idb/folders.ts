@@ -1,41 +1,5 @@
 import type { Folder } from "@/types";
-import { runTransaction } from "./utils";
-
-const dbName = "flashcard-data";
-const dbVersion = 1;
-const storeNames = {
-  folders: "folders",
-  cards: "cards",
-};
-let db: IDBDatabase | null = null;
-
-export function getDB() {
-  if (!db) {
-    throw new Error("Database not initialized");
-  }
-  return db;
-}
-
-export function initDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(dbName, dbVersion);
-
-    request.onerror = () => {
-      reject(request.error);
-    };
-
-    request.onsuccess = () => {
-      db = request.result;
-      resolve(db);
-    };
-
-    request.onupgradeneeded = () => {
-      db = request.result;
-      db.createObjectStore(storeNames.folders, { keyPath: "id" });
-      db.createObjectStore(storeNames.cards, { keyPath: "id" });
-    };
-  });
-}
+import { getDB, storeNames } from "./init";
 
 export async function createFolder(folder: Folder): Promise<{
   success: boolean;
@@ -44,9 +8,14 @@ export async function createFolder(folder: Folder): Promise<{
   };
 }> {
   const db = getDB();
-  await runTransaction(db, storeNames.folders, "readwrite", (store) =>
-    store.add(folder),
-  );
+  const tx = db.transaction([storeNames.folders], "readwrite");
+  const store = tx.objectStore(storeNames.folders);
+  await new Promise<void>((resolve, reject) => {
+    const req = store.add(folder);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
   return {
     success: true,
     data: {
@@ -57,28 +26,66 @@ export async function createFolder(folder: Folder): Promise<{
 
 export function getFolderById(id: string): Promise<Folder | null> {
   const db = getDB();
-  return runTransaction(db, storeNames.folders, "readonly", (store) =>
-    store.get(id),
-  );
+  const tx = db.transaction([storeNames.folders], "readonly");
+  const store = tx.objectStore(storeNames.folders);
+  return new Promise<Folder | null>((resolve, reject) => {
+    const req = store.get(id);
+    req.onsuccess = () => resolve((req.result as Folder) ?? null);
+    req.onerror = () => reject(req.error);
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
 }
 
 export function getAllFolders(): Promise<Folder[]> {
   const db = getDB();
-  return runTransaction(db, storeNames.folders, "readonly", (store) =>
-    store.getAll(),
-  );
+  const tx = db.transaction([storeNames.folders], "readonly");
+  const store = tx.objectStore(storeNames.folders);
+  return new Promise<Folder[]>((resolve, reject) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve((req.result as Folder[]) ?? []);
+    req.onerror = () => reject(req.error);
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
 }
 
 export async function removeFolder(id: string): Promise<void> {
   const db = getDB();
-  await runTransaction(db, storeNames.folders, "readwrite", (store) =>
-    store.delete(id),
-  );
+  const tx = db.transaction([storeNames.folders], "readwrite");
+  const store = tx.objectStore(storeNames.folders);
+  await new Promise<void>((resolve, reject) => {
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
 }
 
-export async function updateFolder(folder: Folder): Promise<void> {
+export async function updateFolder(id: string, name: string): Promise<void> {
   const db = getDB();
-  await runTransaction(db, storeNames.folders, "readwrite", (store) =>
-    store.put(folder),
-  );
+  const tx = db.transaction([storeNames.folders], "readwrite");
+  const store = tx.objectStore(storeNames.folders);
+  await new Promise<void>((resolve, reject) => {
+    const getReq = store.get(id);
+    getReq.onerror = () => reject(getReq.error);
+    getReq.onsuccess = () => {
+      const folder = getReq.result as Folder | undefined;
+      if (!folder) {
+        reject(new Error("Folder not found"));
+        return;
+      }
+      const updated: Folder = { ...folder, name };
+      const putReq = store.put(updated);
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
 }
+
+export const folderDB = {
+  createFolder,
+  getFolderById,
+  getAllFolders,
+  removeFolder,
+  updateFolder,
+};

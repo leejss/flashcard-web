@@ -23,7 +23,6 @@ export function CardsListView() {
   const { state } = useFlashcardState();
   const { getCurrentFolder, updateCard, deleteCard } = useFlashcardActions();
   const { currentFolderId } = state;
-
   const currentFolder = getCurrentFolder();
   const cards = currentFolder?.cards || [];
 

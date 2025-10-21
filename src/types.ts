@@ -1,5 +1,6 @@
 export interface Card {
   id: string;
+  folderId: string;
   front: string;
   back: string;
   correct: number;
@@ -10,7 +11,7 @@ export interface Card {
 export interface Folder {
   id: string;
   name: string;
-  cards: Card[];
+  cards: Card[]; // TODO: remove
 }
 
 export interface StorageAdapter {
