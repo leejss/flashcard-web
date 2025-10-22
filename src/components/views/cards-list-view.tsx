@@ -48,7 +48,7 @@ export function CardsListView() {
     };
 
     load();
-  }, [currentFolder?.id]);
+  }, [currentFolder?.id, cards]);
 
   const openEditCardDialog = (index: number) => {
     setEditingCardIndex(index);
