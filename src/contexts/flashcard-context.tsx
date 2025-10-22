@@ -1,6 +1,7 @@
 "use client";
 
-import { folderDB, getAllFolders } from "@/storage/idb/folders";
+import { cardDB } from "@/storage/idb/cards";
+import { folderDB } from "@/storage/idb/folders";
 import { Card, Folder } from "@/types";
 import { generateId } from "@/utils/id-generator";
 import {
@@ -19,7 +20,6 @@ import {
   FlashcardState,
   ViewMode,
 } from "./flashcard-types";
-import { cardDB } from "@/storage/idb/cards";
 
 const createDefaultFolders = (): Folder[] => [];
 const initializeState = (baseState: FlashcardState): FlashcardState => {
@@ -51,7 +51,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const load = async () => {
-      const folders = await getAllFolders();
+      const folders = await folderDB.getAllFolders();
       dispatch({ type: "SET_FOLDERS", payload: folders });
     };
     load();
@@ -90,6 +90,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       const newFolder: Folder = {
         id: generateId(),
         name,
+        cardCount: 0,
       };
       dispatch({ type: "CREATE_FOLDER", payload: newFolder });
       folderDB.createFolder(newFolder);

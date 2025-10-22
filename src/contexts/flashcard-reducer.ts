@@ -38,7 +38,7 @@ export const flashcardReducer = (
         );
 
         if (folder) {
-          folder.cards.push(action.payload.card);
+          folder.cardCount += 1;
         }
 
         break;
@@ -47,6 +47,7 @@ export const flashcardReducer = (
         const folder = draft.folders.find(
           (f) => f.id === action.payload.folderId,
         );
+
         if (folder && folder.cards[action.payload.index]) {
           const card = folder.cards[action.payload.index];
           card.front = action.payload.front;

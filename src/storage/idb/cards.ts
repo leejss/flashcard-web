@@ -1,8 +1,3 @@
-// getAllCards
-// createCard
-// removeCard
-// updateCard
-
 import { Card } from "@/types";
 import { getDB, storeNames } from "./init";
 
@@ -29,8 +24,6 @@ export async function createCard(card: Card): Promise<void> {
     tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
   });
 }
-
-// key (folderId), value (Card[])
 
 export const cardDB = {
   getAllCards,

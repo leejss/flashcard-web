@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EmptyState } from "../empty-state";
 import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -18,20 +18,39 @@ import { useFlashcardState } from "@/contexts/flashcard-hooks";
 import { useFlashcardActions } from "@/contexts/flashcard-hooks";
 import { toast } from "sonner";
 import { Flashcard } from "../flashcard";
+import { cardDB } from "@/storage/idb/cards";
 
 export function CardsListView() {
   const { state } = useFlashcardState();
   const { getCurrentFolder, updateCard, deleteCard } = useFlashcardActions();
-  const { currentFolderId } = state;
-  const currentFolder = getCurrentFolder();
-  const cards = currentFolder?.cards || [];
-
   const [editingCardIndex, setEditingCardIndex] = useState<number | null>(null);
   const [deletingCardIndex, setDeletingCardIndex] = useState<number | null>(
     null,
   );
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newFront, setNewFront] = useState("");
   const [newBack, setNewBack] = useState("");
+  const { currentFolderId } = state;
+  const currentFolder = getCurrentFolder();
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const folderId = currentFolder?.id;
+        if (!folderId) return;
+        setLoading(true);
+        const cards = await cardDB.getAllCards(folderId);
+        setCards(cards);
+      } catch (error) {
+        console.error("[error]", String(error));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [currentFolder?.id]);
 
   const openEditCardDialog = (index: number) => {
     setEditingCardIndex(index);

@@ -1,8 +1,8 @@
 import { useFlashcard } from "./flashcard-context";
 
 export function useFlashcardState() {
-  const { state, isHydrating } = useFlashcard();
-  return { state, isHydrating };
+  const { state } = useFlashcard();
+  return { state };
 }
 
 export function useFlashcardActions() {

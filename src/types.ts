@@ -11,7 +11,8 @@ export interface Card {
 export interface Folder {
   id: string;
   name: string;
-  cards: Card[]; // TODO: remove
+  cardCount: number;
+  cards: Card[];
 }
 
 export interface StorageAdapter {
