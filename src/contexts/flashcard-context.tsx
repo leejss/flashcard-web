@@ -51,8 +51,10 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const load = async () => {
-      const folders = await folderDB.getAllFolders();
-      dispatch({ type: "SET_FOLDERS", payload: folders });
+      const result = await folderDB.getAllFolders();
+      // map folders to Folder type
+      // const folders = mapFolders(result)
+      dispatch({ type: "SET_FOLDERS", payload: result });
     };
     load();
   }, []);

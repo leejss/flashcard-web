@@ -12,7 +12,6 @@ export interface Folder {
   id: string;
   name: string;
   cardCount: number;
-  cards: Card[];
 }
 
 export interface StorageAdapter {

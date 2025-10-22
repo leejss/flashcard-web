@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { EmptyState } from "../empty-state";
-import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,14 +8,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CardForm } from "../forms/card-form";
-import { Edit2, Trash2, FileQuestion } from "lucide-react";
-import type { Card } from "@/types";
-import { useFlashcardState } from "@/contexts/flashcard-hooks";
-import { useFlashcardActions } from "@/contexts/flashcard-hooks";
-import { toast } from "sonner";
-import { Flashcard } from "../flashcard";
+import {
+  useFlashcardActions,
+  useFlashcardState,
+} from "@/contexts/flashcard-hooks";
 import { cardDB } from "@/storage/idb/cards";
+import type { Card } from "@/types";
+import { Edit2, FileQuestion, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
+import { EmptyState } from "../empty-state";
+import { Flashcard } from "../flashcard";
+import { CardForm } from "../forms/card-form";
 
 export function CardsListView() {
   const { state } = useFlashcardState();
@@ -40,7 +42,7 @@ export function CardsListView() {
         const folderId = currentFolder?.id;
         if (!folderId) return;
         setLoading(true);
-        const cards = await cardDB.getAllCards(folderId);
+        const cards = await cardDB.getCardsByFolderId(folderId);
         setCards(cards);
       } catch (error) {
         console.error("[error]", String(error));
@@ -50,7 +52,7 @@ export function CardsListView() {
     };
 
     load();
-  }, [currentFolder?.id]);
+  }, [currentFolder?.id, cards]);
 
   const openEditCardDialog = (index: number) => {
     setEditingCardIndex(index);

@@ -1,13 +1,26 @@
 import { Card } from "@/types";
 import { getDB, storeNames } from "./init";
 
-export async function getAllCards(folderId: string): Promise<Card[]> {
+export async function getCardsByFolderId(folderId: string): Promise<Card[]> {
   const db = getDB();
   const tx = db.transaction([storeNames.cards], "readonly");
   const store = tx.objectStore(storeNames.cards);
+  const index = store.index("folderId");
+
   return new Promise((resolve, reject) => {
-    const req = store.get(folderId);
-    req.onsuccess = () => resolve(req.result as Card[]);
+    const cards: Card[] = [];
+    const req = index.openCursor(IDBKeyRange.only(folderId));
+
+    req.onsuccess = () => {
+      const cursor = req.result;
+      if (cursor) {
+        cards.push(cursor.value as Card);
+        cursor.continue();
+      } else {
+        resolve(cards);
+      }
+    };
+
     req.onerror = () => reject(req.error);
     tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
   });
@@ -26,6 +39,6 @@ export async function createCard(card: Card): Promise<void> {
 }
 
 export const cardDB = {
-  getAllCards,
+  getCardsByFolderId,
   createCard,
 };

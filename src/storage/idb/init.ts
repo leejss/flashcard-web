@@ -34,7 +34,11 @@ export function initDB(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       db = request.result;
       db.createObjectStore(storeNames.folders, { keyPath: "id" });
-      db.createObjectStore(storeNames.cards, { keyPath: "folderId" });
+      const cardStore = db.createObjectStore(storeNames.cards, {
+        keyPath: "id",
+      });
+      // create index
+      cardStore.createIndex("folderId", "folderId", { unique: false });
     };
   });
 }
