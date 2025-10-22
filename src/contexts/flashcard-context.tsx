@@ -129,6 +129,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       };
       dispatch({ type: "CREATE_CARD", payload: { folderId, card: newCard } });
       cardDB.createCard(newCard);
+      folderDB.incrementCardCount(folderId, 1);
     },
     [dispatch],
   );
@@ -144,8 +145,10 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
   );
 
   const deleteCard = useCallback(
-    (folderId: string, index: number) => {
-      dispatch({ type: "DELETE_CARD", payload: { folderId, index } });
+    (folderId: string, cardId: string) => {
+      dispatch({ type: "DELETE_CARD", payload: { folderId, cardId } });
+      cardDB.deleteCard(cardId);
+      folderDB.incrementCardCount(folderId, -1);
     },
     [dispatch],
   );

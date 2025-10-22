@@ -44,15 +44,6 @@ export const flashcardReducer = (
         break;
       }
       case "UPDATE_CARD": {
-        const folder = draft.folders.find(
-          (f) => f.id === action.payload.folderId,
-        );
-
-        if (folder && folder.cards[action.payload.index]) {
-          const card = folder.cards[action.payload.index];
-          card.front = action.payload.front;
-          card.back = action.payload.back;
-        }
         break;
       }
       case "DELETE_CARD": {
@@ -60,23 +51,11 @@ export const flashcardReducer = (
           (f) => f.id === action.payload.folderId,
         );
         if (folder) {
-          folder.cards.splice(action.payload.index, 1);
+          folder.cardCount = Math.max(0, folder.cardCount - 1);
         }
         break;
       }
       case "UPDATE_CARD_STATS": {
-        const folder = draft.folders.find(
-          (f) => f.id === action.payload.folderId,
-        );
-        if (folder && folder.cards[action.payload.index]) {
-          const card = folder.cards[action.payload.index];
-          if (action.payload.isCorrect) {
-            card.correct += 1;
-          } else {
-            card.incorrect += 1;
-          }
-          card.lastReviewed = action.payload.lastReviewed;
-        }
         break;
       }
     }

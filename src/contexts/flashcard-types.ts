@@ -23,7 +23,7 @@ export type FlashcardAction =
       type: "UPDATE_CARD";
       payload: { folderId: string; index: number; front: string; back: string };
     }
-  | { type: "DELETE_CARD"; payload: { folderId: string; index: number } }
+  | { type: "DELETE_CARD"; payload: { folderId: string; cardId: string } }
   | {
       type: "UPDATE_CARD_STATS";
       payload: {
@@ -49,7 +49,7 @@ export interface FlashcardActions {
     front: string,
     back: string,
   ) => void;
-  deleteCard: (folderId: string, index: number) => void;
+  deleteCard: (folderId: string, cardId: string) => void;
   updateCardStats: (
     folderId: string,
     index: number,

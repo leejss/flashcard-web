@@ -38,7 +38,20 @@ export async function createCard(card: Card): Promise<void> {
   });
 }
 
+export async function deleteCard(cardId: string): Promise<void> {
+  const db = getDB();
+  const tx = db.transaction([storeNames.cards], "readwrite");
+  const store = tx.objectStore(storeNames.cards);
+  await new Promise<void>((resolve, reject) => {
+    const req = store.delete(cardId);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
+}
+
 export const cardDB = {
   getCardsByFolderId,
   createCard,
+  deleteCard,
 };

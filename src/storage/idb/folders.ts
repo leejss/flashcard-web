@@ -82,10 +82,37 @@ export async function updateFolder(id: string, name: string): Promise<void> {
   });
 }
 
+export async function incrementCardCount(
+  id: string,
+  delta: number,
+): Promise<void> {
+  const db = getDB();
+  const tx = db.transaction([storeNames.folders], "readwrite");
+  const store = tx.objectStore(storeNames.folders);
+  await new Promise<void>((resolve, reject) => {
+    const getReq = store.get(id);
+    getReq.onerror = () => reject(getReq.error);
+    getReq.onsuccess = () => {
+      const folder = getReq.result as FolderSchema | undefined;
+      if (!folder) {
+        reject(new Error("FolderSchema not found"));
+        return;
+      }
+      const nextCount = Math.max(0, (folder.cardCount || 0) + delta);
+      const updated: FolderSchema = { ...folder, cardCount: nextCount };
+      const putReq = store.put(updated);
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
+}
+
 export const folderDB = {
   createFolder,
   getFolderById,
   getAllFolders,
   removeFolder,
   updateFolder,
+  incrementCardCount,
 };

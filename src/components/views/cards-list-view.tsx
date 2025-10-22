@@ -30,7 +30,6 @@ export function CardsListView() {
     null,
   );
   const [cards, setCards] = useState<Card[]>([]);
-  const [loading, setLoading] = useState(true);
   const [newFront, setNewFront] = useState("");
   const [newBack, setNewBack] = useState("");
   const { currentFolderId } = state;
@@ -41,18 +40,15 @@ export function CardsListView() {
       try {
         const folderId = currentFolder?.id;
         if (!folderId) return;
-        setLoading(true);
-        const cards = await cardDB.getCardsByFolderId(folderId);
-        setCards(cards);
+        const loadedCards = await cardDB.getCardsByFolderId(folderId);
+        setCards(loadedCards);
       } catch (error) {
         console.error("[error]", String(error));
-      } finally {
-        setLoading(false);
       }
     };
 
     load();
-  }, [currentFolder?.id, cards]);
+  }, [currentFolder?.id]);
 
   const openEditCardDialog = (index: number) => {
     setEditingCardIndex(index);
@@ -77,7 +73,8 @@ export function CardsListView() {
 
   const handleDeleteCard = () => {
     if (deletingCardIndex !== null && currentFolderId) {
-      deleteCard(currentFolderId, deletingCardIndex);
+      const cardId = cards[deletingCardIndex].id;
+      deleteCard(currentFolderId, cardId);
       toast.success("Card deleted");
       setDeletingCardIndex(null);
     }

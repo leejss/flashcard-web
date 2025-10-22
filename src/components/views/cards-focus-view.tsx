@@ -26,6 +26,7 @@ import {
 import type { Card } from "@/types";
 import { useFlashcardState } from "@/contexts/flashcard-hooks";
 import { useFlashcardActions } from "@/contexts/flashcard-hooks";
+import { cardDB } from "@/storage/idb/cards";
 import { toast } from "sonner";
 import { Flashcard } from "../flashcard";
 
@@ -36,7 +37,22 @@ export function CardsFocusView() {
   const { currentFolderId } = state;
 
   const currentFolder = getCurrentFolder();
-  const cards = currentFolder?.cards || [];
+  const [cards, setCards] = useState<Card[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const folderId = currentFolder?.id;
+        if (!folderId) return;
+        const loadedCards = await cardDB.getCardsByFolderId(folderId);
+        setCards(loadedCards);
+      } catch (error) {
+        console.error("[error]", String(error));
+      }
+    };
+
+    load();
+  }, [currentFolder?.id]);
 
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isShuffled, setIsShuffled] = useState(false);
@@ -145,7 +161,8 @@ export function CardsFocusView() {
 
   const handleDeleteCard = () => {
     if (deletingCardIndex !== null && currentFolderId) {
-      deleteCard(currentFolderId, deletingCardIndex);
+      const cardId = cards[deletingCardIndex].id;
+      deleteCard(currentFolderId, cardId);
       if (currentCardIndex >= cards.length - 1 && cards.length > 1) {
         setCurrentCardIndex(cards.length - 2);
       } else if (cards.length === 1) {
