@@ -58,5 +58,9 @@ export const flashcardReducer = (
       case "UPDATE_CARD_STATS": {
         break;
       }
+      case "REFRESH_CARDS": {
+        draft.cardRefreshTrigger += 1;
+        break;
+      }
     }
   });

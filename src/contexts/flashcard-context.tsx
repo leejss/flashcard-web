@@ -43,6 +43,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       currentFolderId: null,
       appView: "folders",
       viewMode: "list",
+      cardRefreshTrigger: 0,
     },
     initializeState,
   );
@@ -172,6 +173,10 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
     return folders.find((folder) => folder.id === currentFolderId);
   }, [folders, currentFolderId]);
 
+  const triggerCardRefresh = useCallback(() => {
+    dispatch({ type: "REFRESH_CARDS" });
+  }, [dispatch]);
+
   const contextValue = useMemo(
     () => ({
       state,
@@ -188,6 +193,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
         deleteCard,
         updateCardStats,
         getCurrentFolder,
+        triggerCardRefresh,
       },
     }),
     [
@@ -204,6 +210,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       deleteCard,
       updateCardStats,
       getCurrentFolder,
+      triggerCardRefresh,
     ],
   );
 

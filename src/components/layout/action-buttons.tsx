@@ -10,9 +10,10 @@ import { useFlashcardActions } from "@/contexts/flashcard-hooks";
 export function ActionButtons() {
   const pathname = usePathname();
   const { state } = useFlashcardState();
-  const { createFolder, createCard } = useFlashcardActions();
+  const { createFolder, createCard, triggerCardRefresh } =
+    useFlashcardActions();
   const { currentFolderId } = state;
-  
+
   const [isAddFolderDialogOpen, setIsAddFolderDialogOpen] = useState(false);
   const [isAddCardDialogOpen, setIsAddCardDialogOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
@@ -33,6 +34,7 @@ export function ActionButtons() {
   const handleAddCard = () => {
     if (currentFolderId && newFront.trim() && newBack.trim()) {
       createCard(currentFolderId, newFront, newBack);
+      triggerCardRefresh();
       setNewFront("");
       setNewBack("");
       setIsAddCardDialogOpen(false);

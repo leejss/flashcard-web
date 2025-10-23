@@ -15,7 +15,7 @@ import {
 import { cardDB } from "@/storage/idb/cards";
 import type { Card } from "@/types";
 import { Edit2, FileQuestion, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
 import { EmptyState } from "../empty-state";
@@ -35,20 +35,21 @@ export function CardsListView() {
   const { currentFolderId } = state;
   const currentFolder = getCurrentFolder();
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const folderId = currentFolder?.id;
-        if (!folderId) return;
-        const loadedCards = await cardDB.getCardsByFolderId(folderId);
-        setCards(loadedCards);
-      } catch (error) {
-        console.error("[error]", String(error));
-      }
-    };
+  // 카드 목록을 로드하는 함수
+  const loadCards = useCallback(async () => {
+    try {
+      const folderId = currentFolder?.id;
+      if (!folderId) return;
+      const loadedCards = await cardDB.getCardsByFolderId(folderId);
+      setCards(loadedCards);
+    } catch (error) {
+      console.error("[error]", String(error));
+    }
+  }, [currentFolder?.id]);
 
-    load();
-  }, [currentFolder?.id, cards]);
+  useEffect(() => {
+    loadCards();
+  }, [loadCards, state.cardRefreshTrigger]);
 
   const openEditCardDialog = (index: number) => {
     setEditingCardIndex(index);
@@ -56,7 +57,7 @@ export function CardsListView() {
     setNewBack(cards[index].back);
   };
 
-  const handleEditCard = () => {
+  const handleEditCard = async () => {
     if (
       newFront.trim() &&
       newBack.trim() &&
@@ -68,15 +69,19 @@ export function CardsListView() {
       setNewBack("");
       setEditingCardIndex(null);
       toast.success("Card updated");
+      // 카드 업데이트 후 목록 갱신
+      await loadCards();
     }
   };
 
-  const handleDeleteCard = () => {
+  const handleDeleteCard = async () => {
     if (deletingCardIndex !== null && currentFolderId) {
       const cardId = cards[deletingCardIndex].id;
       deleteCard(currentFolderId, cardId);
       toast.success("Card deleted");
       setDeletingCardIndex(null);
+      // 카드 삭제 후 목록 갱신
+      await loadCards();
     }
   };
 

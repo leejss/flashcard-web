@@ -8,6 +8,7 @@ export interface FlashcardState {
   currentFolderId: string | null;
   appView: AppView;
   viewMode: ViewMode;
+  cardRefreshTrigger: number; // 카드 목록 갱신 트리거
 }
 
 export type FlashcardAction =
@@ -32,7 +33,8 @@ export type FlashcardAction =
         isCorrect: boolean;
         lastReviewed: string;
       };
-    };
+    }
+  | { type: "REFRESH_CARDS" };
 
 export interface FlashcardActions {
   setFolders: (folders: Folder[]) => void;
@@ -56,4 +58,5 @@ export interface FlashcardActions {
     isCorrect: boolean,
   ) => void;
   getCurrentFolder: () => Folder | undefined;
+  triggerCardRefresh: () => void;
 }
