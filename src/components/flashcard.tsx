@@ -40,14 +40,14 @@ export function Flashcard({ front, back }: FlashcardProps) {
             "absolute select-none inset-0 flex items-center justify-center",
             "p-3 sm:p-4 md:p-6 border-2 border-black rounded-sm transition-colors",
             classes.background,
-            classes.border
+            classes.border,
           )}
         >
           <span
             className={cn(
               "absolute top-2 left-2 sm:top-3 sm:left-3 md:top-4 md:left-4",
               "text-xs sm:text-xs md:text-sm font-semibold",
-              classes.label
+              classes.label,
             )}
           >
             {isFlipped ? "Answer" : "Question"}
