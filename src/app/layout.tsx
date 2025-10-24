@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DialogProvider } from "@/contexts/dialog-context";
 import { FlashcardProvider } from "@/contexts/flashcard-context";
-import { HydrationProvider } from "@/contexts/hydration-provider";
+import { AppInitProvider } from "@/contexts/app-init-provider";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -39,11 +39,11 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <Toaster position="top-right" />
-          <HydrationProvider>
+          <AppInitProvider>
             <FlashcardProvider>
               <DialogProvider>{children}</DialogProvider>
             </FlashcardProvider>
-          </HydrationProvider>
+          </AppInitProvider>
         </ThemeProvider>
       </body>
     </html>

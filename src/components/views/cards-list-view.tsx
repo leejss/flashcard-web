@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { EmptyState } from "../empty-state";
-import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,28 +8,48 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CardForm } from "../forms/card-form";
-import { Edit2, Trash2, FileQuestion } from "lucide-react";
+import {
+  useFlashcardActions,
+  useFlashcardState,
+} from "@/contexts/flashcard-hooks";
+import { cardDB } from "@/storage/idb/cards";
 import type { Card } from "@/types";
-import { useFlashcardState } from "@/contexts/flashcard-hooks";
-import { useFlashcardActions } from "@/contexts/flashcard-hooks";
+import { Edit2, FileQuestion, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { DeleteConfirmDialog } from "../dialogs/delete-confirm-dialog";
+import { EmptyState } from "../empty-state";
 import { Flashcard } from "../flashcard";
+import { CardForm } from "../forms/card-form";
 
 export function CardsListView() {
   const { state } = useFlashcardState();
   const { getCurrentFolder, updateCard, deleteCard } = useFlashcardActions();
-  const { currentFolderId } = state;
-
-  const currentFolder = getCurrentFolder();
-  const cards = currentFolder?.cards || [];
-
   const [editingCardIndex, setEditingCardIndex] = useState<number | null>(null);
   const [deletingCardIndex, setDeletingCardIndex] = useState<number | null>(
     null,
   );
+  const [cards, setCards] = useState<Card[]>([]);
   const [newFront, setNewFront] = useState("");
   const [newBack, setNewBack] = useState("");
+  const { currentFolderId } = state;
+  const currentFolder = getCurrentFolder();
+
+  // 카드 목록을 로드하는 함수
+  const loadCards = useCallback(async () => {
+    try {
+      const folderId = currentFolder?.id;
+      if (!folderId) return;
+      const loadedCards = await cardDB.getCardsByFolderId(folderId);
+      setCards(loadedCards);
+    } catch (error) {
+      console.error("[error]", String(error));
+    }
+  }, [currentFolder?.id]);
+
+  useEffect(() => {
+    loadCards();
+  }, [loadCards, state.cardRefreshTrigger]);
 
   const openEditCardDialog = (index: number) => {
     setEditingCardIndex(index);
@@ -40,26 +57,43 @@ export function CardsListView() {
     setNewBack(cards[index].back);
   };
 
-  const handleEditCard = () => {
+  const handleEditCard = async () => {
     if (
       newFront.trim() &&
       newBack.trim() &&
       editingCardIndex !== null &&
       currentFolderId
     ) {
-      updateCard(currentFolderId, editingCardIndex, newFront, newBack);
-      setNewFront("");
-      setNewBack("");
-      setEditingCardIndex(null);
-      toast.success("Card updated");
+      try {
+        // 메모리 상태 즉시 업데이트
+        updateCard(currentFolderId, editingCardIndex, newFront, newBack);
+
+        // IDB에 저장
+        const cardId = cards[editingCardIndex].id;
+        await cardDB.updateCard(cardId, { front: newFront, back: newBack });
+
+        setNewFront("");
+        setNewBack("");
+        setEditingCardIndex(null);
+        toast.success("Card updated");
+
+        // 카드 목록 갱신
+        await loadCards();
+      } catch (error) {
+        console.error("Failed to update card:", error);
+        toast.error("Failed to update card");
+      }
     }
   };
 
-  const handleDeleteCard = () => {
+  const handleDeleteCard = async () => {
     if (deletingCardIndex !== null && currentFolderId) {
-      deleteCard(currentFolderId, deletingCardIndex);
+      const cardId = cards[deletingCardIndex].id;
+      deleteCard(currentFolderId, cardId);
       toast.success("Card deleted");
       setDeletingCardIndex(null);
+      // 카드 삭제 후 목록 갱신
+      await loadCards();
     }
   };
 

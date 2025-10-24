@@ -1,7 +1,7 @@
 "use client";
 
-import { localStorageAdapter } from "@/storage/local-storage";
-import { SyncManager } from "@/storage/sync";
+import { cardDB } from "@/storage/idb/cards";
+import { folderDB } from "@/storage/idb/folders";
 import { Card, Folder } from "@/types";
 import { generateId } from "@/utils/id-generator";
 import {
@@ -11,8 +11,6 @@ import {
   useEffect,
   useMemo,
   useReducer,
-  useRef,
-  useState,
   type ReactNode,
 } from "react";
 import { flashcardReducer } from "./flashcard-reducer";
@@ -23,16 +21,13 @@ import {
   ViewMode,
 } from "./flashcard-types";
 
-const STORAGE_KEY = "flashcard-data";
 const createDefaultFolders = (): Folder[] => [];
-
 const initializeState = (baseState: FlashcardState): FlashcardState => {
   return { ...baseState, folders: createDefaultFolders() };
 };
 
 interface FlashcardContextType {
   state: FlashcardState;
-  isHydrating: boolean;
   actions: FlashcardActions;
 }
 
@@ -41,7 +36,6 @@ const FlashcardContext = createContext<FlashcardContextType | undefined>(
 );
 
 export function FlashcardProvider({ children }: { children: ReactNode }) {
-  const syncManager = useRef(new SyncManager(localStorageAdapter));
   const [state, dispatch] = useReducer(
     flashcardReducer,
     {
@@ -49,28 +43,20 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       currentFolderId: null,
       appView: "folders",
       viewMode: "list",
+      cardRefreshTrigger: 0,
     },
     initializeState,
   );
 
   const { folders, currentFolderId } = state;
-  const [isHydrating, setIsHydrating] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      // await syncManager.init()
-      const loaded = await syncManager.current.load<Folder[]>();
-      dispatch({ type: "SET_FOLDERS", payload: loaded });
-      setIsHydrating(false);
+      const result = await folderDB.getAllFolders();
+      dispatch({ type: "SET_FOLDERS", payload: result });
     };
     load();
   }, []);
-
-  useEffect(() => {
-    if (!isHydrating && folders.length > 0) {
-      syncManager.current.save(STORAGE_KEY, folders);
-    }
-  }, [folders, isHydrating]);
 
   const setFolders = useCallback(
     (updatedFolders: Folder[]) => {
@@ -105,10 +91,10 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       const newFolder: Folder = {
         id: generateId(),
         name,
-        cards: [],
+        cardCount: 0,
       };
       dispatch({ type: "CREATE_FOLDER", payload: newFolder });
-      // createFolder
+      folderDB.createFolder(newFolder);
     },
     [dispatch],
   );
@@ -116,13 +102,16 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
   const updateFolder = useCallback(
     (id: string, name: string) => {
       dispatch({ type: "UPDATE_FOLDER", payload: { id, name } });
+      folderDB.updateFolder(id, name);
     },
+
     [dispatch],
   );
 
   const deleteFolder = useCallback(
     (id: string) => {
       dispatch({ type: "DELETE_FOLDER", payload: { id } });
+      folderDB.removeFolder(id);
     },
     [dispatch],
   );
@@ -131,12 +120,15 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
     (folderId: string, front: string, back: string) => {
       const newCard: Card = {
         id: generateId(),
+        folderId,
         front,
         back,
         correct: 0,
         incorrect: 0,
       };
       dispatch({ type: "CREATE_CARD", payload: { folderId, card: newCard } });
+      cardDB.createCard(newCard);
+      folderDB.incrementCardCount(folderId, 1);
     },
     [dispatch],
   );
@@ -152,8 +144,10 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
   );
 
   const deleteCard = useCallback(
-    (folderId: string, index: number) => {
-      dispatch({ type: "DELETE_CARD", payload: { folderId, index } });
+    (folderId: string, cardId: string) => {
+      dispatch({ type: "DELETE_CARD", payload: { folderId, cardId } });
+      cardDB.deleteCard(cardId);
+      folderDB.incrementCardCount(folderId, -1);
     },
     [dispatch],
   );
@@ -177,10 +171,13 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
     return folders.find((folder) => folder.id === currentFolderId);
   }, [folders, currentFolderId]);
 
+  const triggerCardRefresh = useCallback(() => {
+    dispatch({ type: "REFRESH_CARDS" });
+  }, [dispatch]);
+
   const contextValue = useMemo(
     () => ({
       state,
-      isHydrating,
       actions: {
         setFolders,
         setCurrentFolderId,
@@ -194,11 +191,11 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
         deleteCard,
         updateCardStats,
         getCurrentFolder,
+        triggerCardRefresh,
       },
     }),
     [
       state,
-      isHydrating,
       setFolders,
       setCurrentFolderId,
       setAppView,
@@ -211,6 +208,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       deleteCard,
       updateCardStats,
       getCurrentFolder,
+      triggerCardRefresh,
     ],
   );
 

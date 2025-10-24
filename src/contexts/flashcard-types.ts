@@ -8,6 +8,7 @@ export interface FlashcardState {
   currentFolderId: string | null;
   appView: AppView;
   viewMode: ViewMode;
+  cardRefreshTrigger: number; // 카드 목록 갱신 트리거
 }
 
 export type FlashcardAction =
@@ -23,7 +24,7 @@ export type FlashcardAction =
       type: "UPDATE_CARD";
       payload: { folderId: string; index: number; front: string; back: string };
     }
-  | { type: "DELETE_CARD"; payload: { folderId: string; index: number } }
+  | { type: "DELETE_CARD"; payload: { folderId: string; cardId: string } }
   | {
       type: "UPDATE_CARD_STATS";
       payload: {
@@ -32,7 +33,8 @@ export type FlashcardAction =
         isCorrect: boolean;
         lastReviewed: string;
       };
-    };
+    }
+  | { type: "REFRESH_CARDS" };
 
 export interface FlashcardActions {
   setFolders: (folders: Folder[]) => void;
@@ -49,11 +51,12 @@ export interface FlashcardActions {
     front: string,
     back: string,
   ) => void;
-  deleteCard: (folderId: string, index: number) => void;
+  deleteCard: (folderId: string, cardId: string) => void;
   updateCardStats: (
     folderId: string,
     index: number,
     isCorrect: boolean,
   ) => void;
   getCurrentFolder: () => Folder | undefined;
+  triggerCardRefresh: () => void;
 }

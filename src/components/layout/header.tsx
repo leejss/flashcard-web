@@ -15,7 +15,7 @@ export function Header() {
   const { theme, setTheme } = useTheme();
 
   const currentFolder = getCurrentFolder();
-  const hasCards = (currentFolder?.cards.length || 0) > 0;
+  const hasCards = (currentFolder?.cardCount || 0) > 0;
   const isViewPage = pathname.startsWith("/view");
   const isListView = pathname === "/view/list";
 

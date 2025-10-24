@@ -11,16 +11,16 @@ interface FolderGuardProps {
 
 export function FolderGuard({ children }: FolderGuardProps) {
   const router = useRouter();
-  const { isHydrating, state } = useFlashcardState();
+  const { state } = useFlashcardState();
   const { currentFolderId } = state;
 
   useEffect(() => {
-    if (!isHydrating && !currentFolderId) {
-      router.back();
+    if (!currentFolderId) {
+      router.replace("/");
     }
-  }, [isHydrating, currentFolderId, router]);
+  }, [currentFolderId, router]);
 
-  if (isHydrating || !currentFolderId) {
+  if (!currentFolderId) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">

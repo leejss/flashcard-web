@@ -38,20 +38,14 @@ export const flashcardReducer = (
         );
 
         if (folder) {
-          folder.cards.push(action.payload.card);
+          folder.cardCount += 1;
         }
 
         break;
       }
       case "UPDATE_CARD": {
-        const folder = draft.folders.find(
-          (f) => f.id === action.payload.folderId,
-        );
-        if (folder && folder.cards[action.payload.index]) {
-          const card = folder.cards[action.payload.index];
-          card.front = action.payload.front;
-          card.back = action.payload.back;
-        }
+        // UPDATE_CARD는 카드 내용만 변경하므로 폴더 상태는 건드릴 필요 없음
+        // IDB 업데이트는 context에서 처리
         break;
       }
       case "DELETE_CARD": {
@@ -59,23 +53,17 @@ export const flashcardReducer = (
           (f) => f.id === action.payload.folderId,
         );
         if (folder) {
-          folder.cards.splice(action.payload.index, 1);
+          folder.cardCount = Math.max(0, folder.cardCount - 1);
         }
         break;
       }
       case "UPDATE_CARD_STATS": {
-        const folder = draft.folders.find(
-          (f) => f.id === action.payload.folderId,
-        );
-        if (folder && folder.cards[action.payload.index]) {
-          const card = folder.cards[action.payload.index];
-          if (action.payload.isCorrect) {
-            card.correct += 1;
-          } else {
-            card.incorrect += 1;
-          }
-          card.lastReviewed = action.payload.lastReviewed;
-        }
+        // UPDATE_CARD_STATS는 카드 통계만 변경하므로 폴더 상태는 건드릴 필요 없음
+        // IDB 업데이트는 context에서 처리
+        break;
+      }
+      case "REFRESH_CARDS": {
+        draft.cardRefreshTrigger += 1;
         break;
       }
     }
