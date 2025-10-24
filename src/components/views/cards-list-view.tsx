@@ -64,13 +64,25 @@ export function CardsListView() {
       editingCardIndex !== null &&
       currentFolderId
     ) {
-      updateCard(currentFolderId, editingCardIndex, newFront, newBack);
-      setNewFront("");
-      setNewBack("");
-      setEditingCardIndex(null);
-      toast.success("Card updated");
-      // 카드 업데이트 후 목록 갱신
-      await loadCards();
+      try {
+        // 메모리 상태 즉시 업데이트
+        updateCard(currentFolderId, editingCardIndex, newFront, newBack);
+
+        // IDB에 저장
+        const cardId = cards[editingCardIndex].id;
+        await cardDB.updateCard(cardId, { front: newFront, back: newBack });
+
+        setNewFront("");
+        setNewBack("");
+        setEditingCardIndex(null);
+        toast.success("Card updated");
+
+        // 카드 목록 갱신
+        await loadCards();
+      } catch (error) {
+        console.error("Failed to update card:", error);
+        toast.error("Failed to update card");
+      }
     }
   };
 

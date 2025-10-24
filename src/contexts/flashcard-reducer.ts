@@ -44,6 +44,8 @@ export const flashcardReducer = (
         break;
       }
       case "UPDATE_CARD": {
+        // UPDATE_CARD는 카드 내용만 변경하므로 폴더 상태는 건드릴 필요 없음
+        // IDB 업데이트는 context에서 처리
         break;
       }
       case "DELETE_CARD": {
@@ -56,6 +58,8 @@ export const flashcardReducer = (
         break;
       }
       case "UPDATE_CARD_STATS": {
+        // UPDATE_CARD_STATS는 카드 통계만 변경하므로 폴더 상태는 건드릴 필요 없음
+        // IDB 업데이트는 context에서 처리
         break;
       }
       case "REFRESH_CARDS": {

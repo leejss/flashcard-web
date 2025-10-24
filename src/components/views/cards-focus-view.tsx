@@ -144,18 +144,29 @@ export function CardsFocusView() {
     setNewBack(cards[index].back);
   };
 
-  const handleEditCard = () => {
+  const handleEditCard = async () => {
     if (
       newFront.trim() &&
       newBack.trim() &&
       editingCardIndex !== null &&
       currentFolderId
     ) {
-      updateCard(currentFolderId, editingCardIndex, newFront, newBack);
-      setNewFront("");
-      setNewBack("");
-      setEditingCardIndex(null);
-      toast.success("Card updated");
+      try {
+        // 메모리 상태 즉시 업데이트
+        updateCard(currentFolderId, editingCardIndex, newFront, newBack);
+
+        // IDB에 저장
+        const cardId = cards[editingCardIndex].id;
+        await cardDB.updateCard(cardId, { front: newFront, back: newBack });
+
+        setNewFront("");
+        setNewBack("");
+        setEditingCardIndex(null);
+        toast.success("Card updated");
+      } catch (error) {
+        console.error("Failed to update card:", error);
+        toast.error("Failed to update card");
+      }
     }
   };
 
@@ -173,18 +184,41 @@ export function CardsFocusView() {
     }
   };
 
-  const handleAnswer = (isCorrect: boolean) => {
+  const handleAnswer = async (isCorrect: boolean) => {
     if (!currentFolderId) return;
 
     const actualIndex = isShuffled
       ? shuffledIndices[currentCardIndex]
       : currentCardIndex;
 
-    updateCardStats(currentFolderId, actualIndex, isCorrect);
-    toast.success(isCorrect ? "Marked as correct!" : "Marked as incorrect");
+    try {
+      // 메모리 상태 즉시 업데이트
+      updateCardStats(currentFolderId, actualIndex, isCorrect);
 
-    if (currentCardIndex < displayCards.length - 1) {
-      setTimeout(() => handleNext(), 300);
+      // IDB에 통계 저장
+      const cardId = cards[actualIndex].id;
+      const updatedCard = cards[actualIndex];
+      const newCorrect = isCorrect
+        ? updatedCard.correct + 1
+        : updatedCard.correct;
+      const newIncorrect = isCorrect
+        ? updatedCard.incorrect
+        : updatedCard.incorrect + 1;
+
+      await cardDB.updateCardStats(cardId, {
+        correct: newCorrect,
+        incorrect: newIncorrect,
+        lastReviewed: new Date().toISOString(),
+      });
+
+      toast.success(isCorrect ? "Marked as correct!" : "Marked as incorrect");
+
+      if (currentCardIndex < displayCards.length - 1) {
+        setTimeout(() => handleNext(), 300);
+      }
+    } catch (error) {
+      console.error("Failed to update card stats:", error);
+      toast.error("Failed to save answer");
     }
   };
 
