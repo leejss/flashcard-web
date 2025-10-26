@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,13 +24,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { exportData } from "@/utils/export";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { exportData, mergeImportedData, parseImportFile } from "@/utils/data";
+import { toast } from "sonner";
+import { folderDB } from "@/storage/idb/folders";
+import { cardDB } from "@/storage/idb/cards";
 
 export function Header() {
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const { setCurrentFolderId, getCurrentFolder } = useFlashcardActions();
+  const { setCurrentFolderId, getCurrentFolder, clearAllData } = useFlashcardActions();
   const [mounted, setMounted] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const currentFolder = getCurrentFolder();
@@ -57,6 +71,26 @@ export function Header() {
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
+  };
+
+  const handleClickImportData = () => {
+    inputFileRef.current?.click();
+  };
+
+  const handleClickClearAll = () => {
+    setShowClearDialog(true);
+  };
+
+  const handleConfirmClearAll = async () => {
+    try {
+      await Promise.all([folderDB.clear(), cardDB.clear()]);
+      clearAllData();
+      toast.success("All data cleared");
+      setShowClearDialog(false);
+    } catch (error) {
+      console.error("Failed to clear data", error);
+      toast.error("Failed to clear data");
+    }
   };
 
   return (
@@ -142,14 +176,17 @@ export function Header() {
               <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                 Data Management
               </DropdownMenuLabel>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() => exportData()}
               >
                 <Download className="w-4 h-4 mr-2" />
                 <span>Export Data</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={handleClickImportData}
+                className="cursor-pointer"
+              >
                 <Upload className="w-4 h-4 mr-2" />
                 <span>Import Data</span>
               </DropdownMenuItem>
@@ -163,6 +200,7 @@ export function Header() {
               <DropdownMenuItem
                 className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
                 variant="destructive"
+                onClick={handleClickClearAll}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 <span>Clear All Data</span>
@@ -171,6 +209,47 @@ export function Header() {
           </DropdownMenu>
         </div>
       </div>
+      <input
+        ref={inputFileRef}
+        type="file"
+        accept=".json"
+        style={{
+          display: "none",
+        }}
+        onChange={async (e) => {
+          try {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const data = await parseImportFile(file);
+            await mergeImportedData(data, "overwrite");
+            // context state update
+          } catch (error) {
+            console.error("Failed to import data", error);
+            toast.error("Failed to import data");
+          }
+        }}
+      />
+
+      {/* Clear All Confirmation Dialog */}
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear All Data?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. All folders and cards will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-3 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmClearAll}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete All
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   );
 }

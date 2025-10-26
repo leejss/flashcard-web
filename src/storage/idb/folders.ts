@@ -24,6 +24,31 @@ export async function createFolder(folder: FolderSchema): Promise<{
   };
 }
 
+export function createFolders(folders: FolderSchema[]) {
+  const db = getDB();
+  const tx = db.transaction([storeNames.folders], "readwrite");
+  const store = tx.objectStore(storeNames.folders);
+  return new Promise((resolve, reject) => {
+    // when to resolve  ? request success === folders.length
+    let completed = 0;
+    const total = folders.length;
+
+    folders.forEach((folder) => {
+      const req = store.add(folder);
+
+      req.onsuccess = () => {
+        completed++;
+        if (completed === total) {
+          resolve(true);
+        }
+      };
+
+      req.onerror = () => reject(req.error);
+      tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+    });
+  });
+}
+
 export function getFolderById(id: string): Promise<FolderSchema | null> {
   const db = getDB();
   const tx = db.transaction([storeNames.folders], "readonly");
@@ -108,11 +133,25 @@ export async function incrementCardCount(
   });
 }
 
+export function clear() {
+  const db = getDB();
+  const tx = db.transaction([storeNames.folders], "readwrite");
+  const store = tx.objectStore(storeNames.folders);
+  return new Promise((resolve, reject) => {
+    const req = store.clear();
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
+}
+
 export const folderDB = {
   createFolder,
+  createFolders,
   getFolderById,
   getAllFolders,
   removeFolder,
   updateFolder,
   incrementCardCount,
+  clear,
 };

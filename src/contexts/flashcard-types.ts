@@ -34,7 +34,8 @@ export type FlashcardAction =
         lastReviewed: string;
       };
     }
-  | { type: "REFRESH_CARDS" };
+  | { type: "REFRESH_CARDS" }
+  | { type: "CLEAR_ALL_DATA" };
 
 export interface FlashcardActions {
   setFolders: (folders: Folder[]) => void;
@@ -59,4 +60,5 @@ export interface FlashcardActions {
   ) => void;
   getCurrentFolder: () => Folder | undefined;
   triggerCardRefresh: () => void;
+  clearAllData: () => void;
 }

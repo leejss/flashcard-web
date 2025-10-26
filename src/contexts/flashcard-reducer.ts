@@ -66,5 +66,12 @@ export const flashcardReducer = (
         draft.cardRefreshTrigger += 1;
         break;
       }
+      case "CLEAR_ALL_DATA": {
+        draft.folders = [];
+        draft.currentFolderId = null;
+        draft.appView = "folders";
+        draft.viewMode = "list";
+        break;
+      }
     }
   });

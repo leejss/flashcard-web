@@ -20,7 +20,6 @@ import {
   FlashcardState,
   ViewMode,
 } from "./flashcard-types";
-import "@/utils/export";
 const createDefaultFolders = (): Folder[] => [];
 const initializeState = (baseState: FlashcardState): FlashcardState => {
   return { ...baseState, folders: createDefaultFolders() };
@@ -175,6 +174,10 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "REFRESH_CARDS" });
   }, [dispatch]);
 
+  const clearAllData = useCallback(() => {
+    dispatch({ type: "CLEAR_ALL_DATA" });
+  }, [dispatch]);
+
   const contextValue = useMemo(
     () => ({
       state,
@@ -192,6 +195,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
         updateCardStats,
         getCurrentFolder,
         triggerCardRefresh,
+        clearAllData,
       },
     }),
     [
@@ -209,6 +213,7 @@ export function FlashcardProvider({ children }: { children: ReactNode }) {
       updateCardStats,
       getCurrentFolder,
       triggerCardRefresh,
+      clearAllData,
     ],
   );
 

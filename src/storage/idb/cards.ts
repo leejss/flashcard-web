@@ -38,6 +38,31 @@ export async function createCard(card: Card): Promise<void> {
   });
 }
 
+export async function createCards(cards: Card[]) {
+  const db = getDB();
+  const tx = db.transaction([storeNames.cards], "readwrite");
+  const store = tx.objectStore(storeNames.cards);
+
+  return new Promise((resolve, reject) => {
+    let completed = 0;
+    const total = cards.length;
+
+    cards.forEach((card) => {
+      const req = store.add(card);
+
+      req.onsuccess = () => {
+        completed++;
+        if (completed === total) {
+          resolve(true);
+        }
+      };
+
+      req.onerror = () => reject(req.error);
+      tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+    });
+  });
+}
+
 export async function deleteCard(cardId: string): Promise<void> {
   const db = getDB();
   const tx = db.transaction([storeNames.cards], "readwrite");
@@ -125,11 +150,25 @@ export function getAllCards(): Promise<Card[]> {
   });
 }
 
+export function clear() {
+  const db = getDB();
+  const tx = db.transaction([storeNames.cards], "readwrite");
+  const store = tx.objectStore(storeNames.cards);
+  return new Promise((resolve, reject) => {
+    const req = store.clear();
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve(true);
+    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+  });
+}
+
 export const cardDB = {
   getCardsByFolderId,
   getAllCards,
   createCard,
+  createCards,
   deleteCard,
   updateCard,
   updateCardStats,
+  clear,
 };
