@@ -110,4 +110,6 @@ export async function mergeImportedData(
 
   if (strategy === "merge") {
   }
+
+  return data;
 }

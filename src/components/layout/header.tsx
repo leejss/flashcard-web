@@ -42,7 +42,8 @@ export function Header() {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const { setCurrentFolderId, getCurrentFolder, clearAllData } = useFlashcardActions();
+  const { setCurrentFolderId, setFolders, getCurrentFolder, clearAllData } =
+    useFlashcardActions();
   const [mounted, setMounted] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -190,9 +191,7 @@ export function Header() {
                 <Upload className="w-4 h-4 mr-2" />
                 <span>Import Data</span>
               </DropdownMenuItem>
-
               <DropdownMenuSeparator />
-
               {/* Danger Zone */}
               <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                 Danger Zone
@@ -221,8 +220,10 @@ export function Header() {
             const file = e.target.files?.[0];
             if (!file) return;
             const data = await parseImportFile(file);
-            await mergeImportedData(data, "overwrite");
-            // context state update
+            const { folders } = await mergeImportedData(data, "overwrite");
+            setFolders(folders);
+            setCurrentFolderId(null);
+            toast.success("Data imported successfully");
           } catch (error) {
             console.error("Failed to import data", error);
             toast.error("Failed to import data");
@@ -236,7 +237,8 @@ export function Header() {
           <AlertDialogHeader>
             <AlertDialogTitle>Clear All Data?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. All folders and cards will be permanently deleted.
+              This action cannot be undone. All folders and cards will be
+              permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-3 justify-end">
