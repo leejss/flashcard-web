@@ -3,9 +3,28 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Focus, List, Moon, Sun } from "lucide-react";
+import {
+  ChevronRight,
+  Focus,
+  List,
+  Moon,
+  Sun,
+  Settings,
+  Download,
+  Upload,
+  Trash2,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useFlashcardActions } from "@/contexts/flashcard-hooks";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { exportData } from "@/utils/export";
 
 export function Header() {
   const router = useRouter();
@@ -43,6 +62,7 @@ export function Header() {
   return (
     <header className="py-4 sm:py-6 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
+        {/* left */}
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
           <button
             onClick={isViewPage ? goBackToFolders : undefined}
@@ -64,6 +84,7 @@ export function Header() {
           )}
         </div>
 
+        {/* right */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Theme Toggle */}
           <Button
@@ -102,6 +123,52 @@ export function Header() {
               )}
             </Button>
           )}
+          {/* Setting Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-9 w-9 p-0"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Settings</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              {/* Data Management */}
+              <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                Data Management
+              </DropdownMenuLabel>
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={() => exportData()}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                <span>Export Data</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
+                <Upload className="w-4 h-4 mr-2" />
+                <span>Import Data</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              {/* Danger Zone */}
+              <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                Danger Zone
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                variant="destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                <span>Clear All Data</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

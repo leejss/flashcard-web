@@ -20,7 +20,7 @@ import {
   FlashcardState,
   ViewMode,
 } from "./flashcard-types";
-
+import "@/utils/export";
 const createDefaultFolders = (): Folder[] => [];
 const initializeState = (baseState: FlashcardState): FlashcardState => {
   return { ...baseState, folders: createDefaultFolders() };
