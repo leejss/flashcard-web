@@ -127,7 +127,7 @@ export function CardsListView() {
             return (
               <div key={card.id} className="relative">
                 <Flashcard front={card.front} back={card.back} />
-                {answerRate !== null && (
+                {/* {answerRate !== null && (
                   <div className="text-center mt-1 mb-1">
                     <span
                       className={`text-xs ${
@@ -142,7 +142,7 @@ export function CardsListView() {
                       reviews)
                     </span>
                   </div>
-                )}
+                )} */}
                 <div className="flex justify-end gap-2 mt-2">
                   <Dialog
                     open={editingCardIndex === index}
@@ -157,9 +157,9 @@ export function CardsListView() {
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="lg"
                         onClick={() => openEditCardDialog(index)}
-                        className="border-2 size-10 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                        className=""
                       >
                         <Edit2 className="w-3 h-3" />
                       </Button>
@@ -182,10 +182,9 @@ export function CardsListView() {
                   </Dialog>
 
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="destructive"
+                    size="lg"
                     onClick={() => setDeletingCardIndex(index)}
-                    className="border-2 size-10 border-black dark:border-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -195,7 +194,6 @@ export function CardsListView() {
           })}
         </div>
       </div>
-
       <DeleteConfirmDialog
         open={deletingCardIndex !== null}
         onOpenChange={(open) => !open && setDeletingCardIndex(null)}
