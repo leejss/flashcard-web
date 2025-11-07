@@ -37,6 +37,7 @@ import { exportData, mergeImportedData, parseImportFile } from "@/utils/data";
 import { toast } from "sonner";
 import { folderDB } from "@/storage/idb/folders";
 import { cardDB } from "@/storage/idb/cards";
+import { ActionButtons } from "./action-buttons";
 
 export function Header() {
   const inputFileRef = useRef<HTMLInputElement>(null);
@@ -121,6 +122,7 @@ export function Header() {
 
         {/* right */}
         <div className="flex items-center gap-2 flex-shrink-0">
+          <ActionButtons />
           {/* Theme Toggle */}
           <Button
             variant="outline"

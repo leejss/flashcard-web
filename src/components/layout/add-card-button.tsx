@@ -33,10 +33,7 @@ export function AddCardButton({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button
-          className="fixed bottom-6 right-4 z-50 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-gray-600 shadow-lg h-14 w-14 rounded-full p-0"
-          size="lg"
-        >
+        <Button className="border-2 border-black dark:border-gray-600 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors h-9 w-9 p-0">
           <Plus className="w-6 h-6" />
         </Button>
       </DialogTrigger>
